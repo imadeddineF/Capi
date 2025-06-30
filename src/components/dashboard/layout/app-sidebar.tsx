@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Car, LayoutGrid, History, Workflow, Plus } from "lucide-react";
+import { Car, LayoutGrid, History, Workflow, Plus, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Sidebar,
@@ -19,6 +19,8 @@ import logo from "../../../../public/logo.svg";
 import logoIcon from "../../../../public/logo-icon.svg";
 import logoText from "../../../../public/logo-text.svg";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { v4 as uuidv4 } from "uuid";
 
 const data = {
     navMain: [
@@ -29,32 +31,32 @@ const data = {
             isActive: false,
             items: [
                 {
-                    title: "Customer Support Chat",
-                    url: "#",
+                    title: "Data analysis and dataset overview",
+                    url: "/chat?id=d4f6f32e-70c5-4a02-ae6d-f6727b494510",
                     date: new Date(),
                     type: "chat",
                 },
                 {
-                    title: "Project Analysis",
-                    url: "#",
+                    title: "Customer Support Analysis",
+                    url: "/chat?id=a1b2c3d4-e5f6-7890-1234-567890abcdef",
                     date: new Date(Date.now() - 86400000),
-                    type: "document",
+                    type: "chat",
                 },
                 {
-                    title: "Data Processing Workflow",
-                    url: "#",
+                    title: "Sales Data Processing",
+                    url: "/chat?id=f9e8d7c6-b5a4-9382-7160-504938271605",
                     date: new Date(Date.now() - 172800000),
-                    type: "workflow",
+                    type: "chat",
                 },
                 {
-                    title: "Weekly Report",
-                    url: "#",
+                    title: "Weekly Report Generation",
+                    url: "/chat?id=12345678-9abc-def0-1234-56789abcdef0",
                     date: new Date(Date.now() - 604800000),
-                    type: "document",
+                    type: "chat",
                 },
                 {
-                    title: "Team Meeting Notes",
-                    url: "#",
+                    title: "Team Meeting Notes Analysis",
+                    url: "/chat?id=abcdef01-2345-6789-abcd-ef0123456789",
                     date: new Date(Date.now() - 2592000000),
                     type: "chat",
                 },
@@ -69,15 +71,15 @@ const data = {
                 {
                     name: "Customer Service",
                     chats: [
-                        { title: "Support Ticket #123", url: "#" },
-                        { title: "Billing Inquiry", url: "#" },
+                        { title: "Support Ticket Analysis", url: "/chat?id=support-001" },
+                        { title: "Customer Feedback Review", url: "/chat?id=feedback-001" },
                     ],
                 },
                 {
                     name: "Data Analysis",
                     chats: [
-                        { title: "Sales Report Q4", url: "#" },
-                        { title: "User Behavior Study", url: "#" },
+                        { title: "Sales Report Q4", url: "/chat?id=sales-q4-001" },
+                        { title: "User Behavior Study", url: "/chat?id=behavior-001" },
                     ],
                 },
             ],
@@ -107,6 +109,7 @@ const testAdmin = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { open, state } = useSidebar();
+    const router = useRouter();
     const [selectedTab, setSelectedTab] = React.useState<string | null>(null);
     const [historyData, setHistoryData] = React.useState(
         data.navMain[0].items || []
@@ -122,6 +125,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 item.title === oldTitle ? { ...item, title: newTitle } : item
             )
         );
+    };
+
+    const handleNewChat = () => {
+        const newChatId = uuidv4();
+        router.push(`/chat?id=${newChatId}`);
     };
 
     // Update the navMain data with current history
@@ -156,14 +164,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarContent className="pt-4">
                 <div className={`${open ? "px-4" : "px-2"} mb-4`}>
                     <Button
+                        onClick={handleNewChat}
                         className={`w-full gap-2 bg-white hover:bg-gray-50 text-gray-900 border ${
                             !open ? "px-2" : ""
                         }`}
                         variant="outline"
                         size={!open ? "icon" : "default"}
                     >
-                        <Plus className="h-4 w-4" />
-                        {open && "New"}
+                        {open ? (
+                            <>
+                                <Plus className="h-4 w-4" />
+                                New Chat
+                            </>
+                        ) : (
+                            <MessageSquare className="h-4 w-4" />
+                        )}
                     </Button>
                 </div>
 

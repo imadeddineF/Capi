@@ -9,6 +9,7 @@ import {
     Pin,
     Edit3,
     Trash2,
+    MessageSquare,
     type LucideIcon,
 } from "lucide-react";
 
@@ -34,6 +35,8 @@ import {
     SidebarInput,
     useSidebar,
 } from "@/components/ui/sidebar";
+import { useRouter } from "next/navigation";
+import { v4 as uuidv4 } from "uuid";
 
 interface HistoryItem {
     title: string;
@@ -77,12 +80,18 @@ export function NavMain({
     onRenameHistoryItem,
 }: NavMainProps) {
     const { open } = useSidebar();
+    const router = useRouter();
     const [searchQueries, setSearchQueries] = React.useState<
         Record<string, string>
     >({});
     const [openSections, setOpenSections] = React.useState<
         Record<string, boolean>
     >({});
+
+    const handleNewChat = () => {
+        const newChatId = uuidv4();
+        router.push(`/chat?id=${newChatId}`);
+    };
 
     const groupHistoryByDate = (items: HistoryItem[]) => {
         const now = new Date();
@@ -203,10 +212,14 @@ export function NavMain({
                                                                 : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                                                         }
                                                     `}
+                                                    onClick={() => router.push(historyItem.url)}
                                                 >
-                                                    <span className="text-sm truncate flex-1">
-                                                        {historyItem.title}
-                                                    </span>
+                                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                        <MessageSquare className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                                                        <span className="text-sm truncate">
+                                                            {historyItem.title}
+                                                        </span>
+                                                    </div>
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger
                                                             asChild
@@ -215,6 +228,7 @@ export function NavMain({
                                                                 variant="ghost"
                                                                 size="sm"
                                                                 className="h-6 w-6 p-0 hover:bg-sidebar-accent-foreground/10 transition-colors opacity-0 group-hover:opacity-100"
+                                                                onClick={(e) => e.stopPropagation()}
                                                             >
                                                                 <MoreVertical className="h-4 w-4" />
                                                             </Button>
@@ -311,10 +325,14 @@ export function NavMain({
                                                             : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                                                     }
                                                 `}
+                                                onClick={() => router.push(chat.url)}
                                             >
-                                                <span className="text-sm truncate flex-1">
-                                                    {chat.title}
-                                                </span>
+                                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                    <MessageSquare className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                                                    <span className="text-sm truncate">
+                                                        {chat.title}
+                                                    </span>
+                                                </div>
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger
                                                         asChild
@@ -323,6 +341,7 @@ export function NavMain({
                                                             variant="ghost"
                                                             size="sm"
                                                             className="h-6 w-6 p-0 hover:bg-sidebar-accent-foreground/10 transition-colors opacity-0 group-hover:opacity-100"
+                                                            onClick={(e) => e.stopPropagation()}
                                                         >
                                                             <MoreVertical className="h-4 w-4" />
                                                         </Button>
