@@ -7,5 +7,9 @@ export default function AuthLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	return <main className="">{children}</main>;
+	return (
+		<div className="min-h-screen bg-background">
+			{children}
+		</div>
+	);
 }

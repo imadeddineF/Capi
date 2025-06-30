@@ -137,7 +137,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const handleDelete = (title: string) => {
         setHistoryData((prev) => prev.filter((item) => item.title !== title));
     };
-
+    
     const handleRename = (oldTitle: string, newTitle: string) => {
         setHistoryData((prev) =>
             prev.map((item) =>
