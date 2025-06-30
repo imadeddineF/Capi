@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import React, { useState, useEffect, useRef, Suspense } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -22,6 +22,7 @@ import { v4 as uuidv4 } from "uuid";
 import { ModelSelectorDropdown } from "@/components/dashboard/chat/model-selector-dropdown";
 import { DisplayOptionsDropdown } from "@/components/dashboard/chat/display-options-dropdown";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import { getUrlParam, setUrlParam } from "@/utils/url-params";
 
 interface Message {
   id: string;
@@ -38,10 +39,28 @@ interface Chat {
   createdAt: Date;
 }
 
-export default function ChatPage() {
+function ChatPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const chatId = searchParams.get("id");
+  const [chatId, setChatId] = useState<string | null>(null);
+
+  // Initialize chatId from URL parameters
+  useEffect(() => {
+    const id = getUrlParam("id");
+    setChatId(id);
+  }, []);
+
+  // Listen for URL changes (back/forward navigation)
+  useEffect(() => {
+    const handlePopState = () => {
+      const id = getUrlParam("id");
+      setChatId(id);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
 
   const [copy, isCopied] = useCopyToClipboard();
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
@@ -157,8 +176,8 @@ export default function ChatPage() {
             ? message.trim().substring(0, 50) + "..."
             : message.trim(),
       };
-      // Update URL without redirecting
-      window.history.replaceState({}, "", `/chat?id=${newChatId}`);
+      // Update URL using pure TypeScript
+      setUrlParam("id", newChatId);
     }
 
     const userMessage: Message = {
@@ -647,5 +666,13 @@ export default function ChatPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ChatPageWrapper() {
+  return (
+    <Suspense fallback={<div>Loading chat...</div>}>
+      <ChatPageContent />
+    </Suspense>
   );
 }

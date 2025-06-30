@@ -129,7 +129,7 @@ const testAdmin = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { open, state } = useSidebar();
   const router = useRouter();
-  const [selectedTab, setSelectedTab] = React.useState<string | null>(null);
+  //   const [selectedTab, setSelectedTab] = React.useState<string | null>(null);
   const [historyData, setHistoryData] = React.useState(
     data.navMain[0].items || []
   );
