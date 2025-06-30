@@ -1,22 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef, Suspense } from "react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
-import {
-  Paperclip,
-  Send,
-  ChevronDown,
-  Bot,
-  User,
-  MoreHorizontal,
-  Copy,
-  Edit,
-  Check,
-  X,
-} from "lucide-react";
+import { Paperclip, Send, Bot, User, Copy, Edit, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { v4 as uuidv4 } from "uuid";
 import { ModelSelectorDropdown } from "@/components/dashboard/chat/model-selector-dropdown";
@@ -39,8 +27,8 @@ interface Chat {
   createdAt: Date;
 }
 
-function ChatPageContent() {
-  const router = useRouter();
+export default function ChatPageContent() {
+  // const router = useRouter();
   const [chatId, setChatId] = useState<string | null>(null);
 
   // Initialize chatId from URL parameters
@@ -377,302 +365,296 @@ function ChatPageContent() {
   };
 
   return (
-    <div className={cn("flex flex-col h-full bg-background")}>
-      {/* Messages Area */}
-      <div className={cn("flex-1 overflow-y-auto bg-background")}>
-        {isNewChat ? (
-          <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center p-6">
-            <div className="mb-8">
-              <h2 className={cn("text-3xl font-bold mb-2 text-hiki")}>
-                What would you like{" "}
-                <span className="text-maria">to uncover today?</span>
-              </h2>
+    <Suspense fallback={<div>Loading chat...</div>}>
+      <div className={cn("flex flex-col h-full bg-background")}>
+        {/* Messages Area */}
+        <div className={cn("flex-1 overflow-y-auto bg-background")}>
+          {isNewChat ? (
+            <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center p-6">
+              <div className="mb-8">
+                <h2 className={cn("text-3xl font-bold mb-2 text-hiki")}>
+                  What would you like{" "}
+                  <span className="text-maria">to uncover today?</span>
+                </h2>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="max-w-4xl mx-auto p-6 space-y-8">
-            {currentChat.messages.map((msg, index) => (
-              <div
-                key={msg.id}
-                className={cn(
-                  "flex gap-3 group",
-                  msg.role === "user" ? "justify-end" : "justify-start",
-                  compactMode && "gap-2"
-                )}
-              >
-                {/* Avatar for Assistant */}
-                {msg.role === "assistant" && showAvatars && (
-                  <div className="w-8 h-8 rounded-full bg-imad flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <Bot className="w-4 h-4 text-white" />
-                  </div>
-                )}
+          ) : (
+            <div className="max-w-4xl mx-auto p-6 space-y-8">
+              {currentChat.messages.map((msg, index) => (
+                <div
+                  key={msg.id}
+                  className={cn(
+                    "flex gap-3 group",
+                    msg.role === "user" ? "justify-end" : "justify-start",
+                    compactMode && "gap-2"
+                  )}
+                >
+                  {/* Avatar for Assistant */}
+                  {msg.role === "assistant" && showAvatars && (
+                    <div className="w-8 h-8 rounded-full bg-imad flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <Bot className="w-4 h-4 text-white" />
+                    </div>
+                  )}
 
-                {/* Message Content */}
-                <div className="">
-                  <div className="flex gap-1">
-                    {msg.role === "user" && (
-                      <div className="flex items-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 text-xs hover:bg-muted/50"
-                          onClick={() => handleStartEdit(msg.id, msg.content)}
-                        >
-                          <Edit className="w-3 h-3" />
-                        </Button>
+                  {/* Message Content */}
+                  <div className="">
+                    <div className="flex gap-1">
+                      {msg.role === "user" && (
+                        <div className="flex items-center">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 text-xs hover:bg-muted/50"
+                            onClick={() => handleStartEdit(msg.id, msg.content)}
+                          >
+                            <Edit className="w-3 h-3" />
+                          </Button>
 
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 text-xs hover:bg-muted/50"
-                          onClick={() => handleCopyMessage(msg.content)}
-                        >
-                          {isCopied ? (
-                            <Check className="w-3 h-3 text-green-500" />
-                          ) : (
-                            <Copy className="w-3 h-3" />
-                          )}
-                        </Button>
-                      </div>
-                    )}
-                    <div
-                      className={cn(
-                        "flex flex-col gap-1",
-                        msg.role === "user" ? "items-end" : "items-start"
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 text-xs hover:bg-muted/50"
+                            onClick={() => handleCopyMessage(msg.content)}
+                          >
+                            {isCopied ? (
+                              <Check className="w-3 h-3 text-green-500" />
+                            ) : (
+                              <Copy className="w-3 h-3" />
+                            )}
+                          </Button>
+                        </div>
                       )}
-                    >
-                      {/* Message Bubble */}
                       <div
                         className={cn(
-                          "relative rounded-2xl px-4 py-3 shadow-sm",
-                          msg.role === "user"
-                            ? "bg-imad text-white"
-                            : "bg-card border border-border/50"
+                          "flex flex-col gap-1",
+                          msg.role === "user" ? "items-end" : "items-start"
                         )}
                       >
-                        {editingMessageId === msg.id ? (
-                          // Edit Mode
-                          <div className="space-y-3">
-                            <Textarea
-                              ref={editTextareaRef}
-                              value={editingContent}
-                              onChange={(e) =>
-                                setEditingContent(e.target.value)
-                              }
-                              onKeyDown={handleEditKeyPress}
-                              className={cn(
-                                "min-h-[60px] resize-none border-0 bg-transparent p-0",
-                                "focus-visible:ring-0 focus-visible:ring-offset-0",
-                                msg.role === "user"
-                                  ? "text-white"
-                                  : "text-foreground"
-                              )}
-                              placeholder="Edit your message..."
-                            />
-                            <div className="flex items-center justify-end gap-2">
-                              <Button
-                                onClick={handleCancelEdit}
-                                size="sm"
-                                variant="ghost"
-                                className="h-7 px-3 text-xs text-white/70 hover:text-white hover:bg-white/10"
-                              >
-                                <X className="w-3 h-3" />
-                              </Button>
-                              <Button
-                                onClick={handleSaveEdit}
-                                size="sm"
-                                className="h-7 px-3 text-xs bg-white/20 hover:bg-white/30 text-white border border-white/30"
-                              >
-                                <Check className="w-3 h-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          // Normal Mode
-                          <div className="flex items-start gap-2">
-                            <div className="flex-1">
-                              <p
+                        {/* Message Bubble */}
+                        <div
+                          className={cn(
+                            "relative rounded-2xl px-4 py-3 shadow-sm",
+                            msg.role === "user"
+                              ? "bg-imad text-white"
+                              : "bg-card border border-border/50"
+                          )}
+                        >
+                          {editingMessageId === msg.id ? (
+                            // Edit Mode
+                            <div className="space-y-3">
+                              <Textarea
+                                ref={editTextareaRef}
+                                value={editingContent}
+                                onChange={(e) =>
+                                  setEditingContent(e.target.value)
+                                }
+                                onKeyDown={handleEditKeyPress}
                                 className={cn(
-                                  "leading-relaxed whitespace-pre-wrap",
-                                  getFontSizeClass(),
+                                  "min-h-[60px] resize-none border-0 bg-transparent p-0",
+                                  "focus-visible:ring-0 focus-visible:ring-offset-0",
                                   msg.role === "user"
                                     ? "text-white"
                                     : "text-foreground"
                                 )}
-                              >
-                                {msg.content}
-                              </p>
+                                placeholder="Edit your message..."
+                              />
+                              <div className="flex items-center justify-end gap-2">
+                                <Button
+                                  onClick={handleCancelEdit}
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 px-3 text-xs text-white/70 hover:text-white hover:bg-white/10"
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                                <Button
+                                  onClick={handleSaveEdit}
+                                  size="sm"
+                                  className="h-7 px-3 text-xs bg-white/20 hover:bg-white/30 text-white border border-white/30"
+                                >
+                                  <Check className="w-3 h-3" />
+                                </Button>
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          ) : (
+                            // Normal Mode
+                            <div className="flex items-start gap-2">
+                              <div className="flex-1">
+                                <p
+                                  className={cn(
+                                    "leading-relaxed whitespace-pre-wrap",
+                                    getFontSizeClass(),
+                                    msg.role === "user"
+                                      ? "text-white"
+                                      : "text-foreground"
+                                  )}
+                                >
+                                  {msg.content}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
+                    </div>
+
+                    {/* Timestamp and Status */}
+                    <div
+                      className={cn(
+                        "flex items-center gap-2 text-xs",
+                        msg.role === "user" ? "justify-end" : "justify-start"
+                      )}
+                    >
+                      {showTimestamps && (
+                        <span className="text-muted-foreground">
+                          {msg.timestamp.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      )}
+                      {msg.role === "user" && (
+                        <div className="flex items-center gap-1">
+                          <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                          <span className="text-muted-foreground">
+                            {msg.isEdited ? "Edited" : "Delivered"}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Timestamp and Status */}
-                  <div
-                    className={cn(
-                      "flex items-center gap-2 text-xs",
-                      msg.role === "user" ? "justify-end" : "justify-start"
-                    )}
-                  >
-                    {showTimestamps && (
-                      <span className="text-muted-foreground">
-                        {msg.timestamp.toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                    )}
-                    {msg.role === "user" && (
-                      <div className="flex items-center gap-1">
-                        <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                        <span className="text-muted-foreground">
-                          {msg.isEdited ? "Edited" : "Delivered"}
+                  {/* Avatar for User */}
+                  {msg.role === "user" && showAvatars && (
+                    <div className="w-8 h-8 rounded-full bg-imad flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <User className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Loading Indicator */}
+              {isLoading && (
+                <div className="flex gap-3 justify-start">
+                  {showAvatars && (
+                    <div className="w-8 h-8 rounded-full bg-imad flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <Bot className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-1">
+                    <div className="bg-card border border-border/50 rounded-2xl px-4 py-3 shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
+                          <div
+                            className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
+                            style={{ animationDelay: "0.1s" }}
+                          ></div>
+                          <div
+                            className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
+                            style={{ animationDelay: "0.2s" }}
+                          ></div>
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          AI is thinking...
                         </span>
                       </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Avatar for User */}
-                {msg.role === "user" && showAvatars && (
-                  <div className="w-8 h-8 rounded-full bg-imad flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <User className="w-4 h-4 text-white" />
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {/* Loading Indicator */}
-            {isLoading && (
-              <div className="flex gap-3 justify-start">
-                {showAvatars && (
-                  <div className="w-8 h-8 rounded-full bg-imad flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <Bot className="w-4 h-4 text-white" />
-                  </div>
-                )}
-                <div className="flex flex-col gap-1">
-                  <div className="bg-card border border-border/50 rounded-2xl px-4 py-3 shadow-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="flex gap-1">
-                        <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                        <div
-                          className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
-                          style={{ animationDelay: "0.1s" }}
-                        ></div>
-                        <div
-                          className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
-                          style={{ animationDelay: "0.2s" }}
-                        ></div>
-                      </div>
-                      <span className="text-sm text-muted-foreground">
-                        AI is thinking...
-                      </span>
+                    </div>
+                    <div className="text-xs text-muted-foreground ml-1">
+                      {new Date().toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </div>
                   </div>
-                  <div className="text-xs text-muted-foreground ml-1">
-                    {new Date().toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </div>
                 </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
-      </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </div>
 
-      {/* Input Area */}
-      <div className={cn("border-t border-border bg-background")}>
-        <div className="max-w-4xl mx-auto p-6">
-          {/* Model/Tools/Agents Selection */}
-          <div className="mb-4 flex items-center justify-between">
-            <ModelSelectorDropdown
-              selectedModel={selectedModel}
-              selectedTools={selectedTools}
-              selectedAgent={selectedAgent}
-              onModelSelect={handleModelSelect}
-              onToolToggle={handleToolToggle}
-              onAgentSelect={handleAgentSelect}
-            />
-            <DisplayOptionsDropdown
-              showTimestamps={showTimestamps}
-              showAvatars={showAvatars}
-              compactMode={compactMode}
-              darkMode={darkMode}
-              fontSize={fontSize}
-              onToggleTimestamps={handleToggleTimestamps}
-              onToggleAvatars={handleToggleAvatars}
-              onToggleCompactMode={handleToggleCompactMode}
-              onToggleDarkMode={handleToggleDarkMode}
-              onFontSizeChange={handleFontSizeChange}
-            />
-          </div>
-
-          {/* Message Input */}
-          <div className="relative">
-            <div className="relative bg-card border border-border rounded-2xl shadow-sm">
-              <Textarea
-                ref={textareaRef}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={handleKeyPress}
-                placeholder={
-                  isNewChat
-                    ? "Link your data and ask anything..."
-                    : "Type your message..."
-                }
-                className={cn(
-                  "min-h-[60px] max-h-[200px] pr-24 resize-none border-0 bg-transparent rounded-2xl",
-                  "focus-visible:ring-0 focus-visible:ring-offset-0"
-                )}
-                disabled={isLoading}
+        {/* Input Area */}
+        <div className={cn("border-t border-border bg-background")}>
+          <div className="max-w-4xl mx-auto p-6">
+            {/* Model/Tools/Agents Selection */}
+            <div className="mb-4 flex items-center justify-between">
+              <ModelSelectorDropdown
+                selectedModel={selectedModel}
+                selectedTools={selectedTools}
+                selectedAgent={selectedAgent}
+                onModelSelect={handleModelSelect}
+                onToolToggle={handleToolToggle}
+                onAgentSelect={handleAgentSelect}
               />
-
-              <div className="absolute bottom-2 right-2 flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 hover:bg-muted/50 rounded-xl"
-                  disabled={isLoading}
-                >
-                  <Paperclip className="w-4 h-4" />
-                </Button>
-
-                <Button
-                  onClick={handleSendMessage}
-                  size="icon"
-                  className="h-8 w-8 bg-hiki hover:bg-hiki/90 rounded-xl shadow-sm"
-                  disabled={!message.trim() || isLoading}
-                >
-                  <Send className="w-4 h-4" />
-                </Button>
-              </div>
+              <DisplayOptionsDropdown
+                showTimestamps={showTimestamps}
+                showAvatars={showAvatars}
+                compactMode={compactMode}
+                darkMode={darkMode}
+                fontSize={fontSize}
+                onToggleTimestamps={handleToggleTimestamps}
+                onToggleAvatars={handleToggleAvatars}
+                onToggleCompactMode={handleToggleCompactMode}
+                onToggleDarkMode={handleToggleDarkMode}
+                onFontSizeChange={handleFontSizeChange}
+              />
             </div>
 
-            {/* Input Footer */}
-            <div className="flex items-center justify-between mt-2 px-1">
-              <div className="text-xs text-muted-foreground">
-                Press Enter to send, Shift+Enter for new line
+            {/* Message Input */}
+            <div className="relative">
+              <div className="relative bg-card border border-border rounded-2xl shadow-sm">
+                <Textarea
+                  ref={textareaRef}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  placeholder={
+                    isNewChat
+                      ? "Link your data and ask anything..."
+                      : "Type your message..."
+                  }
+                  className={cn(
+                    "min-h-[60px] max-h-[200px] pr-24 resize-none border-0 bg-transparent rounded-2xl",
+                    "focus-visible:ring-0 focus-visible:ring-offset-0"
+                  )}
+                  disabled={isLoading}
+                />
+
+                <div className="absolute bottom-2 right-2 flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 hover:bg-muted/50 rounded-xl"
+                    disabled={isLoading}
+                  >
+                    <Paperclip className="w-4 h-4" />
+                  </Button>
+
+                  <Button
+                    onClick={handleSendMessage}
+                    size="icon"
+                    className="h-8 w-8 bg-hiki hover:bg-hiki/90 rounded-xl shadow-sm"
+                    disabled={!message.trim() || isLoading}
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground">
-                {message.length}/4000
+
+              {/* Input Footer */}
+              <div className="flex items-center justify-between mt-2 px-1">
+                <div className="text-xs text-muted-foreground">
+                  Press Enter to send, Shift+Enter for new line
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {message.length}/4000
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-export default function ChatPageWrapper() {
-  return (
-    <Suspense fallback={<div>Loading chat...</div>}>
-      <ChatPageContent />
     </Suspense>
   );
 }

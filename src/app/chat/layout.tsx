@@ -4,7 +4,6 @@ import { DashboardNavbar } from "@/components/dashboard/layout/app-navbar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/dashboard/layout/app-sidebar";
-import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 
 export default function ChatLayout({
   children,

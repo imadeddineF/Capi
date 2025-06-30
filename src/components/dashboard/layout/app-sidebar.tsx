@@ -1,14 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  Car,
-  LayoutGrid,
-  History,
-  Workflow,
-  Plus,
-  MessageSquare,
-} from "lucide-react";
+import { LayoutGrid, History, Workflow, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
