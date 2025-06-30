@@ -14,10 +14,12 @@ import {
     Users,
     ChevronDown,
     Bot,
-    User
+    User,
+    MoreHorizontal
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { v4 as uuidv4 } from "uuid";
+import { ModelSelectorSheet } from "@/components/dashboard/chat/model-selector-sheet";
 
 interface Message {
     id: string;
@@ -41,9 +43,11 @@ export default function ChatPage() {
     const [currentChat, setCurrentChat] = useState<Chat | null>(null);
     const [message, setMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedModel, setSelectedModel] = useState("GPT-4");
-    const [selectedTools, setSelectedTools] = useState("Data Analysis");
-    const [selectedAgents, setSelectedAgents] = useState("Research Agent");
+    const [selectedModel, setSelectedModel] = useState("gpt-4-turbo");
+    const [selectedTools, setSelectedTools] = useState<string[]>(["data-analysis"]);
+    const [selectedAgent, setSelectedAgent] = useState("agent-1");
+    const [sheetOpen, setSheetOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState<"models" | "tools" | "agents">("models");
     
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -160,6 +164,54 @@ export default function ChatPage() {
         }
     };
 
+    const handleBadgeClick = (tab: "models" | "tools" | "agents") => {
+        setActiveTab(tab);
+        setSheetOpen(true);
+    };
+
+    const handleModelSelect = (model: string) => {
+        setSelectedModel(model);
+        setSheetOpen(false);
+    };
+
+    const handleToolToggle = (tool: string) => {
+        setSelectedTools(prev => 
+            prev.includes(tool) 
+                ? prev.filter(t => t !== tool)
+                : [...prev, tool]
+        );
+    };
+
+    const handleAgentSelect = (agent: string) => {
+        setSelectedAgent(agent);
+        setSheetOpen(false);
+    };
+
+    const getModelName = () => {
+        const modelMap: Record<string, string> = {
+            "gpt-4-turbo": "GPT-4 Turbo",
+            "gpt-4": "GPT-4",
+            "claude-3-opus": "Claude 3 Opus",
+            "claude-3-sonnet": "Claude 3 Sonnet",
+            "gemini-pro": "Gemini Pro"
+        };
+        return modelMap[selectedModel] || "GPT-4 Turbo";
+    };
+
+    const getAgentName = () => {
+        const agentMap: Record<string, string> = {
+            "agent-1": "Research Agent",
+            "agent-2": "Data Scientist",
+            "agent-3": "Business Analyst",
+            "agent-4": "Code Assistant",
+            "agent-5": "Report Writer",
+            "agent-6": "Visualization Expert",
+            "agent-7": "Quality Checker",
+            "agent-8": "Strategy Advisor"
+        };
+        return agentMap[selectedAgent] || "Research Agent";
+    };
+
     if (!currentChat) {
         return (
             <div className="flex items-center justify-center h-full bg-white">
@@ -191,7 +243,7 @@ export default function ChatPage() {
                         <Settings className="w-4 h-4" />
                     </Button>
                     <Button variant="ghost" size="icon">
-                        <Users className="w-4 h-4" />
+                        <MoreHorizontal className="w-4 h-4" />
                     </Button>
                 </div>
             </div>
@@ -273,21 +325,33 @@ export default function ChatPage() {
                 <div className="max-w-4xl mx-auto">
                     {/* Model/Tools/Agents Selection */}
                     <div className="flex items-center gap-4 mb-4">
-                        <Badge variant="outline" className="gap-2 cursor-pointer hover:bg-gray-50 border-gray-200">
+                        <Badge 
+                            variant="outline" 
+                            className="gap-2 cursor-pointer hover:bg-gray-50 border-gray-200"
+                            onClick={() => handleBadgeClick("models")}
+                        >
                             <Sparkles className="w-3 h-3 text-imad" />
-                            Model
+                            {getModelName()}
                             <ChevronDown className="w-3 h-3" />
                         </Badge>
                         
-                        <Badge variant="outline" className="gap-2 cursor-pointer hover:bg-gray-50 border-gray-200">
+                        <Badge 
+                            variant="outline" 
+                            className="gap-2 cursor-pointer hover:bg-gray-50 border-gray-200"
+                            onClick={() => handleBadgeClick("tools")}
+                        >
                             <Settings className="w-3 h-3 text-maria" />
-                            Tools
+                            Tools ({selectedTools.length})
                             <ChevronDown className="w-3 h-3" />
                         </Badge>
                         
-                        <Badge variant="outline" className="gap-2 cursor-pointer hover:bg-gray-50 border-gray-200">
+                        <Badge 
+                            variant="outline" 
+                            className="gap-2 cursor-pointer hover:bg-gray-50 border-gray-200"
+                            onClick={() => handleBadgeClick("agents")}
+                        >
                             <Users className="w-3 h-3 text-imad" />
-                            Agents
+                            {getAgentName()}
                             <ChevronDown className="w-3 h-3" />
                         </Badge>
                     </div>
@@ -326,6 +390,18 @@ export default function ChatPage() {
                     </div>
                 </div>
             </div>
+
+            <ModelSelectorSheet
+                open={sheetOpen}
+                onOpenChange={setSheetOpen}
+                activeTab={activeTab}
+                selectedModel={selectedModel}
+                selectedTools={selectedTools}
+                selectedAgent={selectedAgent}
+                onModelSelect={handleModelSelect}
+                onToolToggle={handleToolToggle}
+                onAgentSelect={handleAgentSelect}
+            />
         </div>
     );
 }
