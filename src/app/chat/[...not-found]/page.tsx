@@ -196,7 +196,7 @@ export default function NotFound() {
 					transition={{ delay: 0.9, duration: 0.5 }}
 				>
 					<Button asChild size="lg" className="gap-2">
-						<Link href="/dashboard">
+						<Link href="/chat">
 							<Home className="w-4 h-4" />
 							<span>Back to Home</span>
 						</Link>

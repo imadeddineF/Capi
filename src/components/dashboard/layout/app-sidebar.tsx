@@ -1,7 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { Car, LayoutGrid, History, Workflow, Plus, MessageSquare } from "lucide-react";
+import {
+    Car,
+    LayoutGrid,
+    History,
+    Workflow,
+    Plus,
+    MessageSquare,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Sidebar,
@@ -71,15 +78,27 @@ const data = {
                 {
                     name: "Customer Service",
                     chats: [
-                        { title: "Support Ticket Analysis", url: "/chat?id=support-001" },
-                        { title: "Customer Feedback Review", url: "/chat?id=feedback-001" },
+                        {
+                            title: "Support Ticket Analysis",
+                            url: "/chat?id=support-001",
+                        },
+                        {
+                            title: "Customer Feedback Review",
+                            url: "/chat?id=feedback-001",
+                        },
                     ],
                 },
                 {
                     name: "Data Analysis",
                     chats: [
-                        { title: "Sales Report Q4", url: "/chat?id=sales-q4-001" },
-                        { title: "User Behavior Study", url: "/chat?id=behavior-001" },
+                        {
+                            title: "Sales Report Q4",
+                            url: "/chat?id=sales-q4-001",
+                        },
+                        {
+                            title: "User Behavior Study",
+                            url: "/chat?id=behavior-001",
+                        },
                     ],
                 },
             ],
@@ -88,7 +107,7 @@ const data = {
     projects: [
         {
             name: "My files",
-            url: "/dashboard/my-files",
+            url: "/chat/my-files",
             icon: LayoutGrid,
         },
     ],
@@ -153,7 +172,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     open ? "px-4" : "px-2"
                 } flex items-start`}
             >
-                <Link href="/dashboard" className="flex items-end -space-x-1">
+                <Link href="/chat" className="flex items-end -space-x-1">
                     <Image src={logoIcon} alt="logo" className="h-8" />
                     {open && (
                         <Image src={logoText} alt="logo" className="h-7" />
