@@ -1,17 +1,8 @@
 "use client";
 
 import * as React from "react";
-import {
-    Car,
-    LayoutGrid,
-    Settings2,
-    History,
-    Workflow,
-    FileText,
-    Plus,
-} from "lucide-react";
+import { Car, LayoutGrid, History, Workflow, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SidebarMenuButton } from "@/components/ui/sidebar";
 import {
     Sidebar,
     SidebarContent,
@@ -24,6 +15,10 @@ import Link from "next/link";
 import { NavProjects } from "./nav-projects";
 import { NavUser } from "./nav-user";
 import { NavMain } from "./nav-main";
+import logo from "../../../../public/logo.svg";
+import logoIcon from "../../../../public/logo-icon.svg";
+import logoText from "../../../../public/logo-text.svg";
+import Image from "next/image";
 
 const data = {
     navMain: [
@@ -106,12 +101,12 @@ const testAdmin = {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     language: "en",
-    profilePic: "/avatar.png",
+    profilePic: "/placeholder.svg?height=32&width=32",
     status: "active",
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-    const { open } = useSidebar();
+    const { open, state } = useSidebar();
     const [selectedTab, setSelectedTab] = React.useState<string | null>(null);
     const [historyData, setHistoryData] = React.useState(
         data.navMain[0].items || []
@@ -141,26 +136,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         [historyData]
     );
 
+    const isCollapsed = state === "collapsed";
+
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader
-                className={`border-b border-softligne ${
+                className={`border-b h-14 border-border ${
                     open ? "px-4" : "px-2"
-                }`}
+                } flex items-start`}
             >
-                <Link href="/dashboard" className="flex items-center gap-3">
-                    <Car className="h-8 w-8" />
+                <Link href="/dashboard" className="flex items-end">
+                    <Image src={logoIcon} alt="logo" className="h-8" />
                     {open && (
-                        <span className="text-lg font-semibold">Railflow</span>
+                        <Image src={logoText} alt="logo" className="h-7" />
                     )}
                 </Link>
             </SidebarHeader>
 
-            <SidebarContent className="pt-4 sidebar-toolbar">
-                <div className="px-4">
-                    <Button className="w-full gap-2 bg-white" variant="outline">
+            <SidebarContent className="pt-4">
+                <div className={`${open ? "px-4" : "px-2"} mb-4`}>
+                    <Button
+                        className={`w-full gap-2 bg-white hover:bg-gray-50 text-gray-900 border ${
+                            !open ? "px-2" : ""
+                        }`}
+                        variant="outline"
+                        size={!open ? "icon" : "default"}
+                    >
                         <Plus className="h-4 w-4" />
-                        New
+                        {open && "New"}
                     </Button>
                 </div>
 

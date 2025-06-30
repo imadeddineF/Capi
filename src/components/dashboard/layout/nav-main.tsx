@@ -30,6 +30,7 @@ import {
     SidebarMenuItem,
     SidebarMenuSub,
     SidebarInput,
+    useSidebar,
 } from "@/components/ui/sidebar";
 
 interface HistoryItem {
@@ -69,8 +70,12 @@ export function NavMain({
     onDeleteHistoryItem,
     onRenameHistoryItem,
 }: NavMainProps) {
+    const { open } = useSidebar();
     const [searchQueries, setSearchQueries] = React.useState<
         Record<string, string>
+    >({});
+    const [openSections, setOpenSections] = React.useState<
+        Record<string, boolean>
     >({});
 
     const groupHistoryByDate = (items: HistoryItem[]) => {
@@ -116,14 +121,21 @@ export function NavMain({
         }
     };
 
+    const toggleSection = (itemTitle: string) => {
+        setOpenSections((prev) => ({
+            ...prev,
+            [itemTitle]: !prev[itemTitle],
+        }));
+    };
+
     const renderHistoryItems = (item: NavItem) => {
-        if (!item.items) return null;
+        if (!item.items || !open) return null;
 
         const searchQuery = searchQueries[item.title] || "";
         const groupedHistory = groupHistoryByDate(item.items);
 
         return (
-            <div className="space-y-2">
+            <div className="space-y-2 px-2">
                 <div className="relative mb-2">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <SidebarInput
@@ -136,7 +148,7 @@ export function NavMain({
                     />
                 </div>
 
-                <div className="ml-2 space-y-2">
+                <div className="space-y-2">
                     {Object.entries(groupedHistory).map(
                         ([key, historyItems]) => {
                             if (historyItems.length === 0) return null;
@@ -227,12 +239,12 @@ export function NavMain({
     };
 
     const renderWorkflowItems = (item: NavItem) => {
-        if (!item.workflows) return null;
+        if (!item.workflows || !open) return null;
 
         const searchQuery = searchQueries[item.title] || "";
 
         return (
-            <div className="space-y-2">
+            <div className="space-y-2 px-2">
                 <div className="relative mb-2">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <SidebarInput
@@ -245,7 +257,7 @@ export function NavMain({
                     />
                 </div>
 
-                <div className="ml-2 space-y-2">
+                <div className="space-y-2">
                     {item.workflows.map((workflow) => (
                         <div key={workflow.name}>
                             <div className="text-sm font-medium text-muted-foreground px-2 mb-1">
@@ -307,13 +319,14 @@ export function NavMain({
 
     return (
         <SidebarGroup>
-            <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+            {open && <SidebarGroupLabel>Workspace</SidebarGroupLabel>}
             <SidebarMenu>
                 {items.map((item) => (
                     <Collapsible
                         key={item.title}
                         asChild
-                        defaultOpen={item.isActive}
+                        open={openSections[item.title]}
+                        onOpenChange={() => toggleSection(item.title)}
                         className="group/collapsible"
                     >
                         <SidebarMenuItem>
@@ -327,14 +340,23 @@ export function NavMain({
                                             <item.icon className="h-4 w-4" />
                                         )}
                                         <span>
-                                            {item.title} (
-                                            {item.items?.length ||
-                                                item.workflows?.length ||
-                                                0}
-                                            )
+                                            {open ? (
+                                                <>
+                                                    {item.title} (
+                                                    {item.items?.length ||
+                                                        item.workflows
+                                                            ?.length ||
+                                                        0}
+                                                    )
+                                                </>
+                                            ) : (
+                                                item.title
+                                            )}
                                         </span>
                                     </div>
-                                    <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                    {open && (
+                                        <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                    )}
                                 </SidebarMenuButton>
                             </CollapsibleTrigger>
                             <CollapsibleContent>

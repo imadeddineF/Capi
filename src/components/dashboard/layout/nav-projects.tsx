@@ -4,7 +4,6 @@ import {
     Folder,
     Forward,
     MoreHorizontal,
-    MoreVertical,
     Trash2,
     type LucideIcon,
 } from "lucide-react";
@@ -35,21 +34,21 @@ export function NavProjects({
         icon: LucideIcon;
     }[];
 }) {
-    const { isMobile } = useSidebar();
+    const { isMobile, open } = useSidebar();
 
     return (
-        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-            {/* <SidebarGroupLabel>Projects</SidebarGroupLabel> */}
+        <SidebarGroup>
+            {open && <SidebarGroupLabel>Projects</SidebarGroupLabel>}
             <SidebarMenu>
                 {projects.map((item) => (
                     <SidebarMenuItem key={item.name}>
-                        <SidebarMenuButton asChild>
+                        <SidebarMenuButton asChild tooltip={item.name}>
                             <a href={item.url}>
                                 <item.icon />
                                 <span>{item.name}</span>
                             </a>
                         </SidebarMenuButton>
-                        {/* <DropdownMenu>
+                        <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <SidebarMenuAction showOnHover>
                                     <MoreHorizontal />
@@ -75,15 +74,9 @@ export function NavProjects({
                                     <span>Delete Project</span>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
-                        </DropdownMenu> */}
+                        </DropdownMenu>
                     </SidebarMenuItem>
                 ))}
-                {/* <SidebarMenuItem>
-                    <SidebarMenuButton className="text-sidebar-foreground/70">
-                        <MoreVertical className="text-sidebar-foreground/70" />
-                        <span>More</span>
-                    </SidebarMenuButton>
-                </SidebarMenuItem> */}
             </SidebarMenu>
         </SidebarGroup>
     );
