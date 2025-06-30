@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../styles/globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
-import { ViewTransitions } from "next-view-transitions";
 import { NetworkProvider } from "@/providers/network-provider";
 import ReactQueryProvider from "@/providers/react-query-provider";
 import { Toaster } from "sonner";
@@ -28,26 +27,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ViewTransitions>
-      <html lang="en" suppressHydrationWarning>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
         >
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <NetworkProvider>
-              <ReactQueryProvider>
-                {children}
-                <Toaster position="top-right" richColors closeButton />
-              </ReactQueryProvider>
-            </NetworkProvider>
-          </ThemeProvider>
-        </body>
-      </html>
-    </ViewTransitions>
+          <NetworkProvider>
+            <ReactQueryProvider>
+              {children}
+              <Toaster position="top-right" richColors closeButton />
+            </ReactQueryProvider>
+          </NetworkProvider>
+        </ThemeProvider>
+      </body>
+    </html>
   );
 }
