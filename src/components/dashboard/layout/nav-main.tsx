@@ -1,7 +1,22 @@
 "use client";
 
-import { ChevronRight, Search, type LucideIcon } from "lucide-react";
-
+import * as React from "react";
+import {
+    ChevronRight,
+    Search,
+    MoreVertical,
+    Pin,
+    Edit3,
+    Trash2,
+    type LucideIcon,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
     Collapsible,
     CollapsibleContent,
@@ -9,31 +24,290 @@ import {
 } from "@/components/ui/collapsible";
 import {
     SidebarGroup,
+    SidebarGroupLabel,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarMenuSub,
-    SidebarMenuSubButton,
-    SidebarMenuSubItem,
+    SidebarInput,
 } from "@/components/ui/sidebar";
-import { Input } from "@/components/ui/input";
+
+interface HistoryItem {
+    title: string;
+    url: string;
+    date: Date;
+    type: string;
+}
+
+interface WorkflowChat {
+    title: string;
+    url: string;
+}
+
+interface Workflow {
+    name: string;
+    chats: WorkflowChat[];
+}
+
+interface NavItem {
+    title: string;
+    url: string;
+    icon?: LucideIcon;
+    isActive?: boolean;
+    items?: HistoryItem[];
+    workflows?: Workflow[];
+}
+
+interface NavMainProps {
+    items: NavItem[];
+    onDeleteHistoryItem?: (title: string) => void;
+    onRenameHistoryItem?: (oldTitle: string, newTitle: string) => void;
+}
 
 export function NavMain({
     items,
-}: {
-    items: {
-        title: string;
-        url: string;
-        icon?: LucideIcon;
-        isActive?: boolean;
-        items?: {
-            title: string;
-            url: string;
-        }[];
-    }[];
-}) {
+    onDeleteHistoryItem,
+    onRenameHistoryItem,
+}: NavMainProps) {
+    const [searchQueries, setSearchQueries] = React.useState<
+        Record<string, string>
+    >({});
+
+    const groupHistoryByDate = (items: HistoryItem[]) => {
+        const now = new Date();
+        const yesterday = new Date(now.getTime() - 86400000);
+        const weekAgo = new Date(now.getTime() - 604800000);
+        const monthAgo = new Date(now.getTime() - 2592000000);
+
+        const groups = {
+            today: [] as HistoryItem[],
+            yesterday: [] as HistoryItem[],
+            week: [] as HistoryItem[],
+            month: [] as HistoryItem[],
+            older: [] as HistoryItem[],
+        };
+
+        items.forEach((item) => {
+            const itemDate = new Date(item.date);
+            if (itemDate.toDateString() === now.toDateString()) {
+                groups.today.push(item);
+            } else if (itemDate.toDateString() === yesterday.toDateString()) {
+                groups.yesterday.push(item);
+            } else if (itemDate > weekAgo) {
+                groups.week.push(item);
+            } else if (itemDate > monthAgo) {
+                groups.month.push(item);
+            } else {
+                groups.older.push(item);
+            }
+        });
+
+        return groups;
+    };
+
+    const handleSearch = (itemTitle: string, query: string) => {
+        setSearchQueries((prev) => ({ ...prev, [itemTitle]: query }));
+    };
+
+    const handleRename = (oldTitle: string) => {
+        const newTitle = prompt("Enter new title:", oldTitle);
+        if (newTitle && onRenameHistoryItem) {
+            onRenameHistoryItem(oldTitle, newTitle);
+        }
+    };
+
+    const renderHistoryItems = (item: NavItem) => {
+        if (!item.items) return null;
+
+        const searchQuery = searchQueries[item.title] || "";
+        const groupedHistory = groupHistoryByDate(item.items);
+
+        return (
+            <div className="space-y-2">
+                <div className="relative mb-2">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <SidebarInput
+                        placeholder="Search content..."
+                        value={searchQuery}
+                        onChange={(e) =>
+                            handleSearch(item.title, e.target.value)
+                        }
+                        className="pl-9 border-none bg-transparent focus-visible:border-0 focus-visible:ring-0 ring-0"
+                    />
+                </div>
+
+                <div className="ml-2 space-y-2">
+                    {Object.entries(groupedHistory).map(
+                        ([key, historyItems]) => {
+                            if (historyItems.length === 0) return null;
+
+                            const groupTitle =
+                                {
+                                    today: "Today",
+                                    yesterday: "Yesterday",
+                                    week: "This Week",
+                                    month: "This Month",
+                                    older: "Older",
+                                }[key] || key;
+
+                            const filteredItems = searchQuery
+                                ? historyItems.filter((historyItem) =>
+                                      historyItem.title
+                                          .toLowerCase()
+                                          .includes(searchQuery.toLowerCase())
+                                  )
+                                : historyItems;
+
+                            if (filteredItems.length === 0) return null;
+
+                            return (
+                                <div key={key}>
+                                    <div className="text-xs font-medium text-muted-foreground px-2 mb-1">
+                                        {groupTitle}
+                                    </div>
+                                    <div className="space-y-1">
+                                        {filteredItems.map((historyItem) => (
+                                            <div
+                                                key={historyItem.title}
+                                                className="group flex items-center justify-between rounded-md px-2 py-1 hover:bg-accent"
+                                            >
+                                                <span className="text-sm truncate flex-1">
+                                                    {historyItem.title}
+                                                </span>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger
+                                                        asChild
+                                                    >
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-6 w-6 p-0 hover:bg-white hover:border transition-colors opacity-0 group-hover:opacity-100"
+                                                        >
+                                                            <MoreVertical className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem>
+                                                            <Pin className="h-4 w-4 mr-2" />
+                                                            Pin
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={() =>
+                                                                handleRename(
+                                                                    historyItem.title
+                                                                )
+                                                            }
+                                                        >
+                                                            <Edit3 className="h-4 w-4 mr-2" />
+                                                            Rename
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={() =>
+                                                                onDeleteHistoryItem?.(
+                                                                    historyItem.title
+                                                                )
+                                                            }
+                                                            className="text-destructive"
+                                                        >
+                                                            <Trash2 className="h-4 w-4 mr-2" />
+                                                            Delete
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        }
+                    )}
+                </div>
+            </div>
+        );
+    };
+
+    const renderWorkflowItems = (item: NavItem) => {
+        if (!item.workflows) return null;
+
+        const searchQuery = searchQueries[item.title] || "";
+
+        return (
+            <div className="space-y-2">
+                <div className="relative mb-2">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <SidebarInput
+                        placeholder="Search workflows..."
+                        value={searchQuery}
+                        onChange={(e) =>
+                            handleSearch(item.title, e.target.value)
+                        }
+                        className="pl-9 border-none bg-transparent focus-visible:border-0 focus-visible:ring-0 ring-0"
+                    />
+                </div>
+
+                <div className="ml-2 space-y-2">
+                    {item.workflows.map((workflow) => (
+                        <div key={workflow.name}>
+                            <div className="text-sm font-medium text-muted-foreground px-2 mb-1">
+                                {workflow.name}
+                            </div>
+                            <div className="space-y-1">
+                                {workflow.chats
+                                    .filter((chat) =>
+                                        searchQuery
+                                            ? chat.title
+                                                  .toLowerCase()
+                                                  .includes(
+                                                      searchQuery.toLowerCase()
+                                                  )
+                                            : true
+                                    )
+                                    .map((chat) => (
+                                        <div
+                                            key={chat.title}
+                                            className="group flex items-center justify-between rounded-md px-2 py-1 hover:bg-accent"
+                                        >
+                                            <span className="text-sm truncate flex-1">
+                                                {chat.title}
+                                            </span>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-6 w-6 p-0 transition-colors opacity-0 group-hover:opacity-100"
+                                                    >
+                                                        <MoreVertical className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem>
+                                                        <Pin className="h-4 w-4 mr-2" />
+                                                        Pin
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem>
+                                                        <Edit3 className="h-4 w-4 mr-2" />
+                                                        Rename
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem className="text-destructive">
+                                                        <Trash2 className="h-4 w-4 mr-2" />
+                                                        Delete
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    };
+
     return (
         <SidebarGroup>
+            <SidebarGroupLabel>Workspace</SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) => (
                     <Collapsible
@@ -43,31 +317,31 @@ export function NavMain({
                         className="group/collapsible"
                     >
                         <SidebarMenuItem>
-                            <CollapsibleTrigger asChild className="h-10">
-                                <SidebarMenuButton tooltip={item.title}>
-                                    {item.icon && <item.icon />}
-                                    <span>{item.title}</span>
-                                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                            <CollapsibleTrigger asChild>
+                                <SidebarMenuButton
+                                    tooltip={item.title}
+                                    className="w-full justify-between"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        {item.icon && (
+                                            <item.icon className="h-4 w-4" />
+                                        )}
+                                        <span>
+                                            {item.title} (
+                                            {item.items?.length ||
+                                                item.workflows?.length ||
+                                                0}
+                                            )
+                                        </span>
+                                    </div>
+                                    <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                                 </SidebarMenuButton>
                             </CollapsibleTrigger>
                             <CollapsibleContent>
                                 <SidebarMenuSub>
-                                    <div className="flex items-center gap-2">
-                                        <Search className="text-gray-500" />
-                                        <input className="border-none outline-none" />
-                                    </div>
-                                    {item.items?.map((subItem) => (
-                                        <SidebarMenuSubItem
-                                            key={subItem.title}
-                                            className="h-8"
-                                        >
-                                            <SidebarMenuSubButton asChild>
-                                                <a href={subItem.url}>
-                                                    <span>{subItem.title}</span>
-                                                </a>
-                                            </SidebarMenuSubButton>
-                                        </SidebarMenuSubItem>
-                                    ))}
+                                    {item.items && renderHistoryItems(item)}
+                                    {item.workflows &&
+                                        renderWorkflowItems(item)}
                                 </SidebarMenuSub>
                             </CollapsibleContent>
                         </SidebarMenuItem>

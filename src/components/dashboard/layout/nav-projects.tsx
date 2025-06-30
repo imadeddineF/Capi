@@ -1,15 +1,30 @@
 "use client";
 
-import { type LucideIcon } from "lucide-react";
+import {
+    Folder,
+    Forward,
+    MoreHorizontal,
+    MoreVertical,
+    Trash2,
+    type LucideIcon,
+} from "lucide-react";
+
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
     SidebarGroup,
+    SidebarGroupLabel,
     SidebarMenu,
+    SidebarMenuAction,
     SidebarMenuButton,
     SidebarMenuItem,
-    // useSidebar,
+    useSidebar,
 } from "@/components/ui/sidebar";
-import { usePathname } from "next/navigation";
-import { Link } from "next-view-transitions";
 
 export function NavProjects({
     projects,
@@ -20,29 +35,55 @@ export function NavProjects({
         icon: LucideIcon;
     }[];
 }) {
-    // const { isMobile } = useSidebar();
-    const pathname = usePathname();
+    const { isMobile } = useSidebar();
 
     return (
-        <SidebarGroup>
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+            {/* <SidebarGroupLabel>Projects</SidebarGroupLabel> */}
             <SidebarMenu>
                 {projects.map((item) => (
-                    <SidebarMenuItem key={item.name} className="h-10">
-                        <SidebarMenuButton
-                            asChild
-                            className={
-                                pathname === item.url
-                                    ? "bg-primary text-white hover:text-white hover:bg-primary" // Active tab styling
-                                    : "" // Inactive tab styling
-                            }
-                        >
-                            <Link href={item.url}>
+                    <SidebarMenuItem key={item.name}>
+                        <SidebarMenuButton asChild>
+                            <a href={item.url}>
                                 <item.icon />
                                 <span>{item.name}</span>
-                            </Link>
+                            </a>
                         </SidebarMenuButton>
+                        {/* <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <SidebarMenuAction showOnHover>
+                                    <MoreHorizontal />
+                                    <span className="sr-only">More</span>
+                                </SidebarMenuAction>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                className="w-48 rounded-lg"
+                                side={isMobile ? "bottom" : "right"}
+                                align={isMobile ? "end" : "start"}
+                            >
+                                <DropdownMenuItem>
+                                    <Folder className="text-muted-foreground" />
+                                    <span>View Project</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                    <Forward className="text-muted-foreground" />
+                                    <span>Share Project</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem>
+                                    <Trash2 className="text-muted-foreground" />
+                                    <span>Delete Project</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu> */}
                     </SidebarMenuItem>
                 ))}
+                {/* <SidebarMenuItem>
+                    <SidebarMenuButton className="text-sidebar-foreground/70">
+                        <MoreVertical className="text-sidebar-foreground/70" />
+                        <span>More</span>
+                    </SidebarMenuButton>
+                </SidebarMenuItem> */}
             </SidebarMenu>
         </SidebarGroup>
     );

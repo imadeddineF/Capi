@@ -1,49 +1,98 @@
 "use client";
 
 import * as React from "react";
-import { Car, LayoutGrid, Settings2 } from "lucide-react";
-import { NavMain } from "./nav-main";
-import { NavProjects } from "./nav-projects";
-import { NavUser } from "./nav-user";
+import {
+    Car,
+    LayoutGrid,
+    Settings2,
+    History,
+    Workflow,
+    FileText,
+    Plus,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { SidebarMenuButton } from "@/components/ui/sidebar";
 import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
     SidebarHeader,
-    SidebarTrigger,
     useSidebar,
     SidebarRail,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-// import Image from "next/image";
+import { NavProjects } from "./nav-projects";
+import { NavUser } from "./nav-user";
+import { NavMain } from "./nav-main";
 
 const data = {
     navMain: [
         {
-            title: "Getting Started",
+            title: "My History",
             url: "#",
+            icon: History,
+            isActive: false,
             items: [
                 {
-                    title: "Installation",
+                    title: "Customer Support Chat",
                     url: "#",
+                    date: new Date(),
+                    type: "chat",
                 },
                 {
-                    title: "Project Structure",
+                    title: "Project Analysis",
                     url: "#",
+                    date: new Date(Date.now() - 86400000),
+                    type: "document",
+                },
+                {
+                    title: "Data Processing Workflow",
+                    url: "#",
+                    date: new Date(Date.now() - 172800000),
+                    type: "workflow",
+                },
+                {
+                    title: "Weekly Report",
+                    url: "#",
+                    date: new Date(Date.now() - 604800000),
+                    type: "document",
+                },
+                {
+                    title: "Team Meeting Notes",
+                    url: "#",
+                    date: new Date(Date.now() - 2592000000),
+                    type: "chat",
+                },
+            ],
+        },
+        {
+            title: "My Workflows",
+            url: "#",
+            icon: Workflow,
+            isActive: false,
+            workflows: [
+                {
+                    name: "Customer Service",
+                    chats: [
+                        { title: "Support Ticket #123", url: "#" },
+                        { title: "Billing Inquiry", url: "#" },
+                    ],
+                },
+                {
+                    name: "Data Analysis",
+                    chats: [
+                        { title: "Sales Report Q4", url: "#" },
+                        { title: "User Behavior Study", url: "#" },
+                    ],
                 },
             ],
         },
     ],
     projects: [
         {
-            name: "Overview",
-            url: "/dashboard",
+            name: "My files",
+            url: "/dashboard/my-files",
             icon: LayoutGrid,
-        },
-        {
-            name: "Settings",
-            url: "/dashboard/settings",
-            icon: Settings2,
         },
     ],
 };
@@ -63,35 +112,71 @@ const testAdmin = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { open } = useSidebar();
+    const [selectedTab, setSelectedTab] = React.useState<string | null>(null);
+    const [historyData, setHistoryData] = React.useState(
+        data.navMain[0].items || []
+    );
+
+    const handleDelete = (title: string) => {
+        setHistoryData((prev) => prev.filter((item) => item.title !== title));
+    };
+
+    const handleRename = (oldTitle: string, newTitle: string) => {
+        setHistoryData((prev) =>
+            prev.map((item) =>
+                item.title === oldTitle ? { ...item, title: newTitle } : item
+            )
+        );
+    };
+
+    // Update the navMain data with current history
+    const updatedNavMain = React.useMemo(
+        () => [
+            {
+                ...data.navMain[0],
+                items: historyData,
+            },
+            data.navMain[1],
+        ],
+        [historyData]
+    );
 
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader
-                className={`!flex justify-between border-b border-softligne ${
-                    open ? "items-start ml-2" : "items-center"
+                className={`border-b border-softligne ${
+                    open ? "px-4" : "px-2"
                 }`}
             >
-                <Link href="/dashboard">
-                    {open ? (
-                        <div className="flex items-center gap-3">
-                            {/* <Image src={logo} alt="logo" width={40} height={40} /> */}
-                            <Car width={40} height={40} />
-                            <span className="font-bold text-xl">Railflow</span>
-                        </div>
-                    ) : (
-                        // <Image src={logo} alt="logo" width={30} height={30} />
-                        <Car width={40} height={40} />
+                <Link href="/dashboard" className="flex items-center gap-3">
+                    <Car className="h-8 w-8" />
+                    {open && (
+                        <span className="text-lg font-semibold">Railflow</span>
                     )}
                 </Link>
             </SidebarHeader>
-            <SidebarContent className="pt-4">
-                <NavMain items={data.navMain} />
+
+            <SidebarContent className="pt-4 sidebar-toolbar">
+                <div className="px-4">
+                    <Button className="w-full gap-2 bg-white" variant="outline">
+                        <Plus className="h-4 w-4" />
+                        New
+                    </Button>
+                </div>
+
+                <NavMain
+                    items={updatedNavMain}
+                    onDeleteHistoryItem={handleDelete}
+                    onRenameHistoryItem={handleRename}
+                />
+
                 <NavProjects projects={data.projects} />
-                {/* <SettingsNav items={data.settingsNav} /> */}
             </SidebarContent>
+
             <SidebarFooter>
                 <NavUser user={testAdmin} />
             </SidebarFooter>
+
             <SidebarRail />
         </Sidebar>
     );
