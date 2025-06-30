@@ -145,7 +145,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     open ? "px-4" : "px-2"
                 } flex items-start`}
             >
-                <Link href="/dashboard" className="flex items-end">
+                <Link href="/dashboard" className="flex items-end -space-x-1">
                     <Image src={logoIcon} alt="logo" className="h-8" />
                     {open && (
                         <Image src={logoText} alt="logo" className="h-7" />

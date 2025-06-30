@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+
 import {
     ChevronRight,
     Search,
@@ -10,6 +11,7 @@ import {
     Trash2,
     type LucideIcon,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -38,11 +40,13 @@ interface HistoryItem {
     url: string;
     date: Date;
     type: string;
+    isActive?: boolean;
 }
 
 interface WorkflowChat {
     title: string;
     url: string;
+    isActive?: boolean;
 }
 
 interface Workflow {
@@ -61,12 +65,14 @@ interface NavItem {
 
 interface NavMainProps {
     items: NavItem[];
+    activeUrl?: string;
     onDeleteHistoryItem?: (title: string) => void;
     onRenameHistoryItem?: (oldTitle: string, newTitle: string) => void;
 }
 
 export function NavMain({
     items,
+    activeUrl,
     onDeleteHistoryItem,
     onRenameHistoryItem,
 }: NavMainProps) {
@@ -128,6 +134,10 @@ export function NavMain({
         }));
     };
 
+    const isItemActive = (itemUrl: string) => {
+        return activeUrl === itemUrl;
+    };
+
     const renderHistoryItems = (item: NavItem) => {
         if (!item.items || !open) return null;
 
@@ -178,56 +188,68 @@ export function NavMain({
                                         {groupTitle}
                                     </div>
                                     <div className="space-y-1">
-                                        {filteredItems.map((historyItem) => (
-                                            <div
-                                                key={historyItem.title}
-                                                className="group flex items-center justify-between rounded-md px-2 py-1 hover:bg-accent"
-                                            >
-                                                <span className="text-sm truncate flex-1">
-                                                    {historyItem.title}
-                                                </span>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger
-                                                        asChild
-                                                    >
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-6 w-6 p-0 hover:bg-white hover:border transition-colors opacity-0 group-hover:opacity-100"
+                                        {filteredItems.map((historyItem) => {
+                                            const isActive =
+                                                historyItem.isActive ||
+                                                isItemActive(historyItem.url);
+
+                                            return (
+                                                <div
+                                                    key={historyItem.title}
+                                                    className={`group flex items-center justify-between rounded-md px-2 py-1 transition-colors cursor-pointer
+                                                        ${
+                                                            isActive
+                                                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                                                : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                                                        }
+                                                    `}
+                                                >
+                                                    <span className="text-sm truncate flex-1">
+                                                        {historyItem.title}
+                                                    </span>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger
+                                                            asChild
                                                         >
-                                                            <MoreVertical className="h-4 w-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem>
-                                                            <Pin className="h-4 w-4 mr-2" />
-                                                            Pin
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem
-                                                            onClick={() =>
-                                                                handleRename(
-                                                                    historyItem.title
-                                                                )
-                                                            }
-                                                        >
-                                                            <Edit3 className="h-4 w-4 mr-2" />
-                                                            Rename
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem
-                                                            onClick={() =>
-                                                                onDeleteHistoryItem?.(
-                                                                    historyItem.title
-                                                                )
-                                                            }
-                                                            className="text-destructive"
-                                                        >
-                                                            <Trash2 className="h-4 w-4 mr-2" />
-                                                            Delete
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </div>
-                                        ))}
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-6 w-6 p-0 hover:bg-sidebar-accent-foreground/10 transition-colors opacity-0 group-hover:opacity-100"
+                                                            >
+                                                                <MoreVertical className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuItem>
+                                                                <Pin className="h-4 w-4 mr-2" />
+                                                                Pin
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem
+                                                                onClick={() =>
+                                                                    handleRename(
+                                                                        historyItem.title
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Edit3 className="h-4 w-4 mr-2" />
+                                                                Rename
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem
+                                                                onClick={() =>
+                                                                    onDeleteHistoryItem?.(
+                                                                        historyItem.title
+                                                                    )
+                                                                }
+                                                                className="text-destructive"
+                                                            >
+                                                                <Trash2 className="h-4 w-4 mr-2" />
+                                                                Delete
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             );
@@ -274,41 +296,55 @@ export function NavMain({
                                                   )
                                             : true
                                     )
-                                    .map((chat) => (
-                                        <div
-                                            key={chat.title}
-                                            className="group flex items-center justify-between rounded-md px-2 py-1 hover:bg-accent"
-                                        >
-                                            <span className="text-sm truncate flex-1">
-                                                {chat.title}
-                                            </span>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="h-6 w-6 p-0 transition-colors opacity-0 group-hover:opacity-100"
+                                    .map((chat) => {
+                                        const isActive =
+                                            chat.isActive ||
+                                            isItemActive(chat.url);
+
+                                        return (
+                                            <div
+                                                key={chat.title}
+                                                className={`group flex items-center justify-between rounded-md px-2 py-1 transition-colors cursor-pointer
+                                                    ${
+                                                        isActive
+                                                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                                            : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                                                    }
+                                                `}
+                                            >
+                                                <span className="text-sm truncate flex-1">
+                                                    {chat.title}
+                                                </span>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger
+                                                        asChild
                                                     >
-                                                        <MoreVertical className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem>
-                                                        <Pin className="h-4 w-4 mr-2" />
-                                                        Pin
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem>
-                                                        <Edit3 className="h-4 w-4 mr-2" />
-                                                        Rename
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem className="text-destructive">
-                                                        <Trash2 className="h-4 w-4 mr-2" />
-                                                        Delete
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </div>
-                                    ))}
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-6 w-6 p-0 hover:bg-sidebar-accent-foreground/10 transition-colors opacity-0 group-hover:opacity-100"
+                                                        >
+                                                            <MoreVertical className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem>
+                                                            <Pin className="h-4 w-4 mr-2" />
+                                                            Pin
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem>
+                                                            <Edit3 className="h-4 w-4 mr-2" />
+                                                            Rename
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem className="text-destructive">
+                                                            <Trash2 className="h-4 w-4 mr-2" />
+                                                            Delete
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
+                                        );
+                                    })}
                             </div>
                         </div>
                     ))}
@@ -334,6 +370,9 @@ export function NavMain({
                                 <SidebarMenuButton
                                     tooltip={item.title}
                                     className="w-full justify-between"
+                                    isActive={
+                                        item.isActive || isItemActive(item.url)
+                                    }
                                 >
                                     <div className="flex items-center gap-2">
                                         {item.icon && (
@@ -344,8 +383,12 @@ export function NavMain({
                                                 <>
                                                     {item.title} (
                                                     {item.items?.length ||
-                                                        item.workflows
-                                                            ?.length ||
+                                                        item.workflows?.reduce(
+                                                            (acc, w) =>
+                                                                acc +
+                                                                w.chats.length,
+                                                            0
+                                                        ) ||
                                                         0}
                                                     )
                                                 </>
@@ -359,6 +402,7 @@ export function NavMain({
                                     )}
                                 </SidebarMenuButton>
                             </CollapsibleTrigger>
+
                             <CollapsibleContent>
                                 <SidebarMenuSub>
                                     {item.items && renderHistoryItems(item)}
