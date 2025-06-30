@@ -147,8 +147,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     };
 
     const handleNewChat = () => {
-        const newChatId = uuidv4();
-        router.push(`/chat?id=${newChatId}`);
+        router.push(`/chat`);
     };
 
     // Update the navMain data with current history

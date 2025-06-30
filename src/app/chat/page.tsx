@@ -65,7 +65,7 @@ export default function ChatPage() {
                 // Create new chat with the provided ID
                 const newChat: Chat = {
                     id: chatId,
-                    title: "Data analysis and dataset overview",
+                    title: "New Chat",
                     messages: [],
                     createdAt: new Date()
                 };
@@ -73,11 +73,16 @@ export default function ChatPage() {
                 saveChatToStorage(newChat);
             }
         } else {
-            // No chat ID, redirect to create new chat
-            const newChatId = uuidv4();
-            router.push(`/chat?id=${newChatId}`);
+            // No chat ID, create a temporary chat without saving
+            const tempChat: Chat = {
+                id: "",
+                title: "New Chat",
+                messages: [],
+                createdAt: new Date()
+            };
+            setCurrentChat(tempChat);
         }
-    }, [chatId, router]);
+    }, [chatId]);
 
     // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
@@ -113,6 +118,19 @@ export default function ChatPage() {
     const handleSendMessage = async () => {
         if (!message.trim() || !currentChat || isLoading) return;
 
+        // If this is a new chat without ID, create one
+        let chatToUpdate = currentChat;
+        if (!currentChat.id) {
+            const newChatId = uuidv4();
+            chatToUpdate = {
+                ...currentChat,
+                id: newChatId,
+                title: message.trim().length > 50 ? message.trim().substring(0, 50) + "..." : message.trim()
+            };
+            // Update URL without redirecting
+            window.history.replaceState({}, '', `/chat?id=${newChatId}`);
+        }
+
         const userMessage: Message = {
             id: uuidv4(),
             content: message.trim(),
@@ -122,11 +140,16 @@ export default function ChatPage() {
 
         // Update chat with user message
         const updatedChat = {
-            ...currentChat,
-            messages: [...currentChat.messages, userMessage]
+            ...chatToUpdate,
+            messages: [...chatToUpdate.messages, userMessage]
         };
         setCurrentChat(updatedChat);
-        saveChatToStorage(updatedChat);
+        
+        // Only save if chat has an ID
+        if (updatedChat.id) {
+            saveChatToStorage(updatedChat);
+        }
+        
         setMessage("");
         setIsLoading(true);
 
@@ -144,7 +167,12 @@ export default function ChatPage() {
                 messages: [...updatedChat.messages, assistantMessage]
             };
             setCurrentChat(finalChat);
-            saveChatToStorage(finalChat);
+            
+            // Only save if chat has an ID
+            if (finalChat.id) {
+                saveChatToStorage(finalChat);
+            }
+            
             setIsLoading(false);
         }, 1500);
     };
@@ -209,45 +237,6 @@ export default function ChatPage() {
 
     return (
         <div className={cn("flex flex-col h-full", darkMode ? "dark bg-gray-900" : "bg-white")}>
-            {/* Header */}
-            <div className={cn(
-                "flex items-center justify-between p-4 border-b border-border",
-                darkMode ? "bg-gray-900 border-gray-700" : "bg-white"
-            )}>
-                <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-sm text-muted-foreground">Connected</span>
-                    <Button variant="ghost" size="sm" className="text-imad">
-                        <ChevronDown className="w-4 h-4" />
-                    </Button>
-                </div>
-                
-                <h1 className={cn(
-                    "text-lg font-semibold text-center flex-1",
-                    darkMode ? "text-white" : "text-hiki"
-                )}>
-                    {currentChat.title}
-                </h1>
-                
-                <div className="flex items-center gap-2">
-                    <DisplayOptionsDropdown
-                        showTimestamps={showTimestamps}
-                        showAvatars={showAvatars}
-                        compactMode={compactMode}
-                        darkMode={darkMode}
-                        fontSize={fontSize}
-                        onToggleTimestamps={handleToggleTimestamps}
-                        onToggleAvatars={handleToggleAvatars}
-                        onToggleCompactMode={handleToggleCompactMode}
-                        onToggleDarkMode={handleToggleDarkMode}
-                        onFontSizeChange={handleFontSizeChange}
-                    />
-                    <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="w-4 h-4" />
-                    </Button>
-                </div>
-            </div>
-
             {/* Messages Area */}
             <div className={cn(
                 "flex-1 overflow-y-auto p-6",
@@ -358,7 +347,7 @@ export default function ChatPage() {
             )}>
                 <div className="max-w-4xl mx-auto">
                     {/* Model/Tools/Agents Selection */}
-                    <div className="mb-4">
+                    <div className="mb-4 flex items-center justify-between">
                         <ModelSelectorDropdown
                             selectedModel={selectedModel}
                             selectedTools={selectedTools}
@@ -366,6 +355,18 @@ export default function ChatPage() {
                             onModelSelect={handleModelSelect}
                             onToolToggle={handleToolToggle}
                             onAgentSelect={handleAgentSelect}
+                        />
+                        <DisplayOptionsDropdown
+                            showTimestamps={showTimestamps}
+                            showAvatars={showAvatars}
+                            compactMode={compactMode}
+                            darkMode={darkMode}
+                            fontSize={fontSize}
+                            onToggleTimestamps={handleToggleTimestamps}
+                            onToggleAvatars={handleToggleAvatars}
+                            onToggleCompactMode={handleToggleCompactMode}
+                            onToggleDarkMode={handleToggleDarkMode}
+                            onFontSizeChange={handleFontSizeChange}
                         />
                     </div>
 
