@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { showToast } from "@/components/custom-ui/toast";
+import Link from "next/link";
 
 interface MarketplaceItem {
   id: string;
@@ -62,65 +63,58 @@ interface MarketplaceItem {
 
 const mockItems: MarketplaceItem[] = [
   {
-    id: "1",
-    name: "E-commerce Customer Analytics Dataset",
+    id: "whatsapp",
+    name: "WhatsApp Integration",
     description:
-      "Comprehensive dataset with customer behavior, purchase history, and demographic data for e-commerce analysis.",
-    category: "dataset",
-    price: 49,
-    rating: 4.8,
-    downloads: 1250,
-    author: "DataCorp Analytics",
-    authorAvatar: "/placeholder.svg?height=40&width=40",
-    tags: ["e-commerce", "customer-analytics", "retail", "behavior"],
+      "Seamlessly connect your business with WhatsApp for customer support and marketing.",
+    category: "tool",
+    price: 0,
+    rating: 4.9,
+    downloads: 3200,
+    author: "Meta Platforms",
+    authorAvatar: "/logo-icon.svg",
+    tags: ["messaging", "integration", "whatsapp"],
     featured: true,
     trending: true,
-    createdAt: new Date("2024-01-15"),
-    thumbnail: "/placeholder.svg?height=200&width=300",
-    previewImages: [
-      "/placeholder.svg?height=300&width=400",
-      "/placeholder.svg?height=300&width=400",
-    ],
+    createdAt: new Date("2024-01-20"),
+    thumbnail: "/logo-icon.svg",
+    previewImages: ["/logo-icon.svg"],
   },
   {
-    id: "2",
-    name: "Advanced Sales Forecasting Model",
+    id: "instagram",
+    name: "Instagram Integration",
     description:
-      "Pre-trained machine learning model for accurate sales forecasting with 95% accuracy rate.",
-    category: "model",
-    price: 99,
-    rating: 4.9,
-    downloads: 890,
-    author: "ML Solutions Inc",
-    authorAvatar: "/placeholder.svg?height=40&width=40",
-    tags: ["forecasting", "sales", "machine-learning", "prediction"],
+      "Automate posts, analyze engagement, and manage DMs with Instagram business tools.",
+    category: "tool",
+    price: 0,
+    rating: 4.8,
+    downloads: 2100,
+    author: "Meta Platforms",
+    authorAvatar: "/logo-icon.svg",
+    tags: ["social", "integration", "instagram"],
     featured: true,
     trending: false,
-    createdAt: new Date("2024-01-12"),
-    thumbnail: "/placeholder.svg?height=200&width=300",
-    previewImages: ["/placeholder.svg?height=300&width=400"],
+    createdAt: new Date("2024-01-18"),
+    thumbnail: "/logo-icon.svg",
+    previewImages: ["/logo-icon.svg"],
   },
   {
-    id: "3",
-    name: "Financial Dashboard Template",
+    id: "facebook",
+    name: "Facebook Integration",
     description:
-      "Professional financial dashboard template with interactive charts and KPI tracking.",
-    category: "template",
-    price: 29,
-    rating: 4.6,
-    downloads: 2100,
-    author: "Design Studio Pro",
-    authorAvatar: "/placeholder.svg?height=40&width=40",
-    tags: ["dashboard", "finance", "template", "visualization"],
+      "Connect your Facebook page, automate replies, and access analytics in one place.",
+    category: "tool",
+    price: 0,
+    rating: 4.7,
+    downloads: 1800,
+    author: "Meta Platforms",
+    authorAvatar: "/logo-icon.svg",
+    tags: ["social", "integration", "facebook"],
     featured: false,
     trending: true,
-    createdAt: new Date("2024-01-10"),
-    thumbnail: "/placeholder.svg?height=200&width=300",
-    previewImages: [
-      "/placeholder.svg?height=300&width=400",
-      "/placeholder.svg?height=300&width=400",
-      "/placeholder.svg?height=300&width=400",
-    ],
+    createdAt: new Date("2024-01-15"),
+    thumbnail: "/logo-icon.svg",
+    previewImages: ["/logo-icon.svg"],
   },
 ];
 
@@ -321,7 +315,10 @@ export default function Marketplace() {
                     </div>
                     <div className="absolute top-3 right-3">
                       <Badge
-                        className={cn("text-xs border", categoryColors[item.category])}
+                        className={cn(
+                          "text-xs border",
+                          categoryColors[item.category]
+                        )}
                       >
                         {item.category}
                       </Badge>
@@ -334,7 +331,9 @@ export default function Marketplace() {
                         {item.name}
                       </h3>
                       <div className="text-right ml-3">
-                        <p className="font-bold text-xl text-imad">${item.price}</p>
+                        <p className="font-bold text-xl text-imad">
+                          ${item.price}
+                        </p>
                       </div>
                     </div>
 
@@ -368,7 +367,10 @@ export default function Marketplace() {
                         </Badge>
                       ))}
                       {item.tags.length > 3 && (
-                        <Badge variant="secondary" className="text-xs bg-muted/50">
+                        <Badge
+                          variant="secondary"
+                          className="text-xs bg-muted/50"
+                        >
                           +{item.tags.length - 3}
                         </Badge>
                       )}
@@ -379,10 +381,12 @@ export default function Marketplace() {
                         variant="outline"
                         size="sm"
                         className="flex-1"
-                        onClick={() => handlePreview(item)}
+                        asChild
                       >
-                        <Eye className="w-4 h-4 mr-2" />
-                        Preview
+                        <Link href={`/marketplace/${item.id}`}>
+                          <Eye className="w-4 h-4 mr-2" />
+                          Preview
+                        </Link>
                       </Button>
                       <Button
                         size="sm"

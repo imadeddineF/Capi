@@ -128,13 +128,13 @@ export default function ChatPageContent() {
         saveChatToStorage(newChat);
       }
     } else {
-      const tempChat: Chat = {
+      // Always reset to a new chat state when no chatId
+      setCurrentChat({
         id: "",
         title: "New Chat",
         messages: [],
         createdAt: new Date(),
-      };
-      setCurrentChat(tempChat);
+      });
     }
   }, [chatId]);
 

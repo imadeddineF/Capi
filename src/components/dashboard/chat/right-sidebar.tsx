@@ -27,6 +27,7 @@ import { ChatFlow } from "./analytics/chat-flow";
 import { ChatAnalytics } from "./analytics/chat-analytics";
 import { TranscriptView } from "./analytics/transcript-view";
 import dummyFlowData from "../chat/analytics/dummy-flow-data";
+import { usePathname } from "next/navigation";
 
 interface Chat {
   id: string;
@@ -49,6 +50,7 @@ export function RightSidebar() {
   const [chatId, setChatId] = useState<string | null>(null);
   const [copy] = useCopyToClipboard();
   const [selectedLanguage, setSelectedLanguage] = useState("Python");
+  const pathname = usePathname();
 
   useEffect(() => {
     const id = getUrlParam("id");
@@ -133,6 +135,10 @@ export function RightSidebar() {
     return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
   };
 
+  // Only show collapsible icon if on /chat
+  const showCollapsibleIcon =
+    pathname === "/chat" || pathname.startsWith("/chat?");
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -163,6 +169,10 @@ export function RightSidebar() {
             {/* Modern Tab Navigation */}
             <div className="p-4 border-b">
               <div className="flex space-x-1 p-1">
+                {showCollapsibleIcon &&
+                  // Render the collapsible icon here if needed
+                  // <YourCollapsibleIconComponent />
+                  null}
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
                   return (

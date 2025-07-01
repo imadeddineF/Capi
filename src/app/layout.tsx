@@ -6,6 +6,7 @@ import { NetworkProvider } from "@/providers/network-provider";
 import ReactQueryProvider from "@/providers/react-query-provider";
 import { AuthProvider } from "@/providers/auth-provider";
 import { Toaster } from "sonner";
+import PreloaderProvider from "@/providers/preloader-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
   title: "Capi",
   description: "An AI assistant for your projects data.",
   icons: {
-    icon: '/logo-icon.svg', 
+    icon: "/logo-icon.svg",
   },
 };
 
@@ -35,21 +36,23 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <NetworkProvider>
+        <PreloaderProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
             <ReactQueryProvider>
               <AuthProvider>
-                {children}
-                <Toaster position="top-right" richColors closeButton />
+                <NetworkProvider>
+                  {children}
+                  <Toaster position="top-center" richColors closeButton />
+                </NetworkProvider>
               </AuthProvider>
             </ReactQueryProvider>
-          </NetworkProvider>
-        </ThemeProvider>
+          </ThemeProvider>
+        </PreloaderProvider>
       </body>
     </html>
   );

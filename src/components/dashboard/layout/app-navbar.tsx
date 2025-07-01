@@ -36,6 +36,16 @@ import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/components/custom-ui/toast";
 import { useRightSidebar } from "../chat/right-sidebar-context";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import Loader from "@/components/shared/loader";
 
 interface Chat {
   id: string;
@@ -55,6 +65,12 @@ export const DashboardNavbar = () => {
   const [selectedLanguage, setSelectedLanguage] = useState("Python");
   const { isOpen: isRightPanelOpen, toggle: toggleRightPanel } =
     useRightSidebar();
+  const [dbDialogOpen, setDbDialogOpen] = useState(false);
+  const [dbUrl, setDbUrl] = useState("");
+  const [dbLoading, setDbLoading] = useState(false);
+  const [dbError, setDbError] = useState("");
+  const [dbTables, setDbTables] = useState<any[]>([]);
+  const [selected, setSelected] = useState<{ [table: string]: string[] }>({});
 
   // Get chatId from URL parameters using native TypeScript
   useEffect(() => {
@@ -252,58 +268,63 @@ export const DashboardNavbar = () => {
 
   const connectionStatus = getConnectionStatus();
 
+  const handleDbConnect = async () => {
+    setDbLoading(true);
+    setDbError("");
+    setDbTables([]);
+    try {
+      // TODO: Call API route to fetch tables/columns from Neon DB
+      // Example: const res = await fetch("/api/neon-tables", { method: "POST", body: JSON.stringify({ dbUrl }) });
+      // const data = await res.json();
+      // setDbTables(data.tables);
+      // For now, mock:
+      setTimeout(() => {
+        setDbTables([
+          { name: "users", columns: ["id", "name", "email"] },
+          { name: "orders", columns: ["id", "user_id", "amount"] },
+        ]);
+        setDbLoading(false);
+      }, 1200);
+    } catch (e) {
+      setDbError("Failed to connect to database.");
+      setDbLoading(false);
+    }
+  };
+
+  const handleSelect = (table: string, column: string) => {
+    setSelected((prev) => {
+      const cols = prev[table] || [];
+      return {
+        ...prev,
+        [table]: cols.includes(column)
+          ? cols.filter((c) => c !== column)
+          : [...cols, column],
+      };
+    });
+  };
+
+  const handleSendToChat = () => {
+    // TODO: Send { dbUrl, selected } to chat as a query
+    setDbDialogOpen(false);
+    showToast.success(
+      "Query sent to chat!",
+      "Your selected tables/columns have been sent."
+    );
+  };
+
   return (
     <nav className="sticky top-0 z-40 w-full border-b h-14 flex items-center justify-between gap-1 px-6 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex items-center gap-3">
         <SidebarTrigger className="hidden md:block" />
 
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={`gap-2 ${connectionStatus.className}`}
-            >
-              {connectionStatus.icon}
-              {connectionStatus.text}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                {isConnected ? (
-                  <CheckCircle className="w-5 h-5 text-imad" />
-                ) : (
-                  <AlertCircle className="w-5 h-5 text-red-500" />
-                )}
-                <div>
-                  <h4 className="font-medium">
-                    {isConnected ? "Connected" : "Connection Lost"}
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    {isConnected
-                      ? "All services are running normally"
-                      : "Check your internet connection"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span>API Status</span>
-                  <Badge variant={isConnected ? "default" : "destructive"}>
-                    {isConnected ? "Online" : "Offline"}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span>Model Status</span>
-                  <Badge variant={isConnected ? "default" : "destructive"}>
-                    {isConnected ? "Available" : "Unavailable"}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2 ml-2 text-imad border-imad/20 bg-imad/10 hover:bg-imad/20 hover:text-imad"
+          onClick={() => setDbDialogOpen(true)}
+        >
+          Connect
+        </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -390,6 +411,58 @@ export const DashboardNavbar = () => {
           />
         </Button>
       </div>
+
+      <Dialog open={dbDialogOpen} onOpenChange={setDbDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Connect to Neon DB</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Enter Neon DB PostgreSQL URL..."
+              value={dbUrl}
+              onChange={(e) => setDbUrl(e.target.value)}
+              disabled={dbLoading}
+            />
+            <Button onClick={handleDbConnect} disabled={dbLoading || !dbUrl}>
+              {dbLoading ? <Loader /> : "Fetch Tables"}
+            </Button>
+            {dbError && <div className="text-red-500 text-sm">{dbError}</div>}
+            {dbTables.length > 0 && (
+              <div className="max-h-48 overflow-y-auto border rounded p-2">
+                {dbTables.map((table) => (
+                  <div key={table.name} className="mb-2">
+                    <div className="font-semibold mb-1">{table.name}</div>
+                    <div className="flex flex-wrap gap-2">
+                      {table.columns.map((col: string) => (
+                        <label key={col} className="flex items-center gap-1">
+                          <Checkbox
+                            checked={
+                              selected[table.name]?.includes(col) || false
+                            }
+                            onCheckedChange={() =>
+                              handleSelect(table.name, col)
+                            }
+                          />
+                          <span className="text-xs">{col}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={handleSendToChat}
+              disabled={Object.keys(selected).length === 0 || !dbUrl}
+            >
+              Send to Chat
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </nav>
   );
 };
