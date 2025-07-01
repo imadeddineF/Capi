@@ -205,7 +205,7 @@ export function ChatFlow({
     [setEdges]
   );
 
-  if (messages.length === 0) {
+  if (!customFlowData && messages.length === 0) {
     return (
       <div
         className={cn(
@@ -222,12 +222,7 @@ export function ChatFlow({
   }
 
   return (
-    <div
-      className={cn(
-        "h-96 bg-background border rounded-lg overflow-hidden",
-        className
-      )}
-    >
+    <div className={cn("h-full bg-background overflow-hidden", className)}>
       <ReactFlow
         nodes={flowNodes}
         edges={flowEdges}
