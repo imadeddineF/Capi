@@ -1,6 +1,6 @@
 "use client";
 
-import { Settings, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useLogout } from "@/hooks/use-auth";
 import { useAuth } from "@/providers/auth-provider";

@@ -1,33 +1,30 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FileText, 
-  Download, 
-  Copy, 
-  Search, 
-  Filter,
-  Calendar,
+import React, { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  FileText,
+  Download,
+  Copy,
+  Search,
   User,
   Bot,
   Clock,
   Hash,
   CheckCircle,
-  AlertCircle
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
-import { showToast } from '@/components/custom-ui/toast';
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import { showToast } from "@/components/custom-ui/toast";
 
 interface ChatMessage {
   id: string;
   content: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   timestamp: Date;
   isEdited?: boolean;
 }
@@ -38,31 +35,41 @@ interface TranscriptViewProps {
   chatId: string;
 }
 
-export function TranscriptView({ messages, chatTitle, chatId }: TranscriptViewProps) {
-  const [searchQuery, setSearchQuery] = useState('');
+export function TranscriptView({
+  messages,
+  chatTitle,
+  chatId,
+}: TranscriptViewProps) {
+  const [searchQuery, setSearchQuery] = useState("");
   const [showTimestamps, setShowTimestamps] = useState(true);
   const [copy, isCopied] = useCopyToClipboard();
 
   const filteredMessages = useMemo(() => {
     if (!searchQuery) return messages;
-    
-    return messages.filter(message =>
+
+    return messages.filter((message) =>
       message.content.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [messages, searchQuery]);
 
   const summary = useMemo(() => {
-    const userMessages = messages.filter(msg => msg.role === 'user').length;
-    const assistantMessages = messages.filter(msg => msg.role === 'assistant').length;
-    const totalWords = messages.reduce((acc, msg) => acc + msg.content.split(' ').length, 0);
+    const userMessages = messages.filter((msg) => msg.role === "user").length;
+    const assistantMessages = messages.filter(
+      (msg) => msg.role === "assistant"
+    ).length;
+    const totalWords = messages.reduce(
+      (acc, msg) => acc + msg.content.split(" ").length,
+      0
+    );
     const avgWordsPerMessage = totalWords / messages.length || 0;
-    
+
     const firstMessage = messages[0];
     const lastMessage = messages[messages.length - 1];
-    const duration = firstMessage && lastMessage 
-      ? lastMessage.timestamp.getTime() - firstMessage.timestamp.getTime()
-      : 0;
-    
+    const duration =
+      firstMessage && lastMessage
+        ? lastMessage.timestamp.getTime() - firstMessage.timestamp.getTime()
+        : 0;
+
     const durationMinutes = Math.round(duration / (1000 * 60));
 
     return {
@@ -78,15 +85,17 @@ export function TranscriptView({ messages, chatTitle, chatId }: TranscriptViewPr
   }, [messages]);
 
   const handleExportTranscript = () => {
-    const transcript = messages.map((msg, index) => {
-      const timestamp = showTimestamps 
-        ? `[${msg.timestamp.toLocaleString()}] `
-        : '';
-      const speaker = msg.role === 'user' ? 'User' : 'Assistant';
-      const edited = msg.isEdited ? ' (edited)' : '';
-      
-      return `${index + 1}. ${timestamp}${speaker}${edited}: ${msg.content}`;
-    }).join('\n\n');
+    const transcript = messages
+      .map((msg, index) => {
+        const timestamp = showTimestamps
+          ? `[${msg.timestamp.toLocaleString()}] `
+          : "";
+        const speaker = msg.role === "user" ? "User" : "Assistant";
+        const edited = msg.isEdited ? " (edited)" : "";
+
+        return `${index + 1}. ${timestamp}${speaker}${edited}: ${msg.content}`;
+      })
+      .join("\n\n");
 
     const fullTranscript = `# Chat Transcript: ${chatTitle}
 Chat ID: ${chatId}
@@ -99,8 +108,8 @@ Generated: ${new Date().toLocaleString()}
 - Total Words: ${summary.totalWords}
 - Average Words per Message: ${summary.avgWordsPerMessage}
 - Duration: ${summary.duration} minutes
-- Start Time: ${summary.startTime?.toLocaleString() || 'N/A'}
-- End Time: ${summary.endTime?.toLocaleString() || 'N/A'}
+- Start Time: ${summary.startTime?.toLocaleString() || "N/A"}
+- End Time: ${summary.endTime?.toLocaleString() || "N/A"}
 
 ## Transcript
 
@@ -109,32 +118,42 @@ ${transcript}
 ---
 Exported from Chat Analytics Dashboard`;
 
-    const blob = new Blob([fullTranscript], { type: 'text/markdown' });
+    const blob = new Blob([fullTranscript], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `chat-transcript-${chatId}-${new Date().toISOString().split('T')[0]}.md`;
+    a.download = `chat-transcript-${chatId}-${
+      new Date().toISOString().split("T")[0]
+    }.md`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    showToast.success('Transcript exported!', 'Your chat transcript has been downloaded as a Markdown file.');
+    showToast.success(
+      "Transcript exported!",
+      "Your chat transcript has been downloaded as a Markdown file."
+    );
   };
 
   const handleCopyTranscript = () => {
-    const transcript = messages.map((msg, index) => {
-      const timestamp = showTimestamps 
-        ? `[${msg.timestamp.toLocaleString()}] `
-        : '';
-      const speaker = msg.role === 'user' ? 'User' : 'Assistant';
-      const edited = msg.isEdited ? ' (edited)' : '';
-      
-      return `${index + 1}. ${timestamp}${speaker}${edited}: ${msg.content}`;
-    }).join('\n\n');
+    const transcript = messages
+      .map((msg, index) => {
+        const timestamp = showTimestamps
+          ? `[${msg.timestamp.toLocaleString()}] `
+          : "";
+        const speaker = msg.role === "user" ? "User" : "Assistant";
+        const edited = msg.isEdited ? " (edited)" : "";
+
+        return `${index + 1}. ${timestamp}${speaker}${edited}: ${msg.content}`;
+      })
+      .join("\n\n");
 
     copy(transcript);
-    showToast.success('Transcript copied!', 'The transcript has been copied to your clipboard.');
+    showToast.success(
+      "Transcript copied!",
+      "The transcript has been copied to your clipboard."
+    );
   };
 
   if (messages.length === 0) {
@@ -183,7 +202,7 @@ Exported from Chat Analytics Dashboard`;
                 Timestamps
               </Button>
             </div>
-            
+
             <div className="flex items-center gap-1">
               <Button
                 variant="outline"
@@ -236,9 +255,9 @@ Exported from Chat Analytics Dashboard`;
               <p className="font-semibold">{summary.avgWordsPerMessage}</p>
             </div>
           </div>
-          
+
           <Separator />
-          
+
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
               <User className="w-3 h-3 text-imad" />
@@ -286,7 +305,7 @@ Exported from Chat Analytics Dashboard`;
                       </>
                     )}
                     <div className="flex items-center gap-1">
-                      {message.role === 'user' ? (
+                      {message.role === "user" ? (
                         <User className="w-3 h-3 text-imad" />
                       ) : (
                         <Bot className="w-3 h-3 text-maria" />
@@ -299,18 +318,20 @@ Exported from Chat Analytics Dashboard`;
                       )}
                     </div>
                   </div>
-                  
-                  <div className={`p-3 rounded-lg text-sm ${
-                    message.role === 'user' 
-                      ? 'bg-imad/10 border border-imad/20' 
-                      : 'bg-card border border-border'
-                  }`}>
+
+                  <div
+                    className={`p-3 rounded-lg text-sm ${
+                      message.role === "user"
+                        ? "bg-imad/10 border border-imad/20"
+                        : "bg-card border border-border"
+                    }`}
+                  >
                     <div className="whitespace-pre-wrap leading-relaxed">
                       {searchQuery ? (
                         <span
                           dangerouslySetInnerHTML={{
                             __html: message.content.replace(
-                              new RegExp(`(${searchQuery})`, 'gi'),
+                              new RegExp(`(${searchQuery})`, "gi"),
                               '<mark class="bg-yellow-200 dark:bg-yellow-800">$1</mark>'
                             ),
                           }}
@@ -320,7 +341,7 @@ Exported from Chat Analytics Dashboard`;
                       )}
                     </div>
                   </div>
-                  
+
                   {index < filteredMessages.length - 1 && (
                     <Separator className="my-3" />
                   )}

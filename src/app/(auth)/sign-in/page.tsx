@@ -15,10 +15,10 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, Mail, Lock, Github, Chrome } from "lucide-react";
-import { ModeToggle } from "@/components/shared/mode-toggle-btn";
-import Image from "next/image";
-import logoIcon from "../../../../public/logo-icon.svg";
-import logoText from "../../../../public/logo-text.svg";
+// import { ModeToggle } from "@/components/shared/mode-toggle-btn";
+// import Image from "next/image";
+// import logoIcon from "../../../../public/logo-icon.svg";
+// import logoText from "../../../../public/logo-text.svg";
 import { useLogin } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
@@ -50,7 +50,7 @@ export default function SignIn() {
             toast.error(data.error || "Login failed");
           }
         },
-        onError: (error) => {
+        onError: () => {
           toast.error("Login failed. Please try again.");
         },
       }
@@ -156,7 +156,7 @@ export default function SignIn() {
                     <Checkbox
                       id="remember"
                       checked={formData.rememberMe}
-                      onCheckedChange={(checked) =>
+                      onCheckedChange={(checked: boolean | string) =>
                         handleInputChange("rememberMe", checked as boolean)
                       }
                       disabled={loginMutation.isPending}

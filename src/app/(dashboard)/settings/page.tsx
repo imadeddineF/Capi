@@ -10,13 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,7 +45,6 @@ import {
   Eye,
   EyeOff,
   AlertTriangle,
-  Check,
   Palette,
   Database,
   Settings2,
@@ -108,7 +107,7 @@ export default function Settings() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Profile state
   const [profile, setProfile] = useState<UserProfile>({
@@ -135,12 +134,12 @@ export default function Settings() {
   });
 
   // Privacy settings
-  const [privacy, setPrivacy] = useState<PrivacySettings>({
-    profileVisibility: "public",
-    dataSharing: true,
-    analyticsTracking: true,
-    thirdPartyIntegrations: false,
-  });
+  // const [privacy, setPrivacy] = useState<PrivacySettings>({
+  //   profileVisibility: "public",
+  //   dataSharing: true,
+  //   analyticsTracking: true,
+  //   thirdPartyIntegrations: false,
+  // });
 
   // API Keys
   const [apiKeys, setApiKeys] = useState<APIKey[]>([
@@ -310,28 +309,20 @@ export default function Settings() {
             {activeTab === "profile" && (
               <Card className="border-0 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl">
-                    Profile Information
-                  </CardTitle>
+                  <CardTitle className="text-xl">Profile Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Avatar */}
                   <div className="flex items-center gap-6">
                     <Avatar className="w-20 h-20">
-                      <AvatarImage
-                        src={profile.avatar || "/placeholder.svg"}
-                      />
+                      <AvatarImage src={profile.avatar || "/placeholder.svg"} />
                       <AvatarFallback className="text-lg bg-imad text-white">
                         {profile.firstName[0]}
                         {profile.lastName[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div className="space-y-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-2"
-                      >
+                      <Button variant="outline" size="sm" className="gap-2">
                         <Camera className="w-4 h-4" />
                         Change Photo
                       </Button>
@@ -451,16 +442,14 @@ export default function Settings() {
                   <div className="space-y-6">
                     <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
                       <div>
-                        <Label className="text-base">
-                          Email Notifications
-                        </Label>
+                        <Label className="text-base">Email Notifications</Label>
                         <p className="text-sm text-muted-foreground">
                           Receive notifications via email
                         </p>
                       </div>
                       <Switch
                         checked={notifications.emailNotifications}
-                        onCheckedChange={(checked) =>
+                        onCheckedChange={(checked: any) =>
                           setNotifications({
                             ...notifications,
                             emailNotifications: checked,
@@ -471,16 +460,14 @@ export default function Settings() {
 
                     <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
                       <div>
-                        <Label className="text-base">
-                          Push Notifications
-                        </Label>
+                        <Label className="text-base">Push Notifications</Label>
                         <p className="text-sm text-muted-foreground">
                           Receive push notifications in your browser
                         </p>
                       </div>
                       <Switch
                         checked={notifications.pushNotifications}
-                        onCheckedChange={(checked) =>
+                        onCheckedChange={(checked: any) =>
                           setNotifications({
                             ...notifications,
                             pushNotifications: checked,
@@ -498,7 +485,7 @@ export default function Settings() {
                       </div>
                       <Switch
                         checked={notifications.marketingEmails}
-                        onCheckedChange={(checked) =>
+                        onCheckedChange={(checked: any) =>
                           setNotifications({
                             ...notifications,
                             marketingEmails: checked,
@@ -516,7 +503,7 @@ export default function Settings() {
                       </div>
                       <Switch
                         checked={notifications.securityAlerts}
-                        onCheckedChange={(checked) =>
+                        onCheckedChange={(checked: any) =>
                           setNotifications({
                             ...notifications,
                             securityAlerts: checked,
@@ -552,9 +539,7 @@ export default function Settings() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="currentPassword">
-                        Current Password
-                      </Label>
+                      <Label htmlFor="currentPassword">Current Password</Label>
                       <div className="relative">
                         <Input
                           id="currentPassword"
@@ -670,8 +655,7 @@ export default function Settings() {
                             </p>
                             <div className="flex items-center gap-4 text-xs text-muted-foreground">
                               <span>
-                                Created:{" "}
-                                {apiKey.createdAt.toLocaleDateString()}
+                                Created: {apiKey.createdAt.toLocaleDateString()}
                               </span>
                               <span>
                                 Last used:{" "}
@@ -704,9 +688,7 @@ export default function Settings() {
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction
-                                  onClick={() =>
-                                    handleDeleteAPIKey(apiKey.id)
-                                  }
+                                  onClick={() => handleDeleteAPIKey(apiKey.id)}
                                 >
                                   Delete
                                 </AlertDialogAction>
@@ -832,9 +814,7 @@ export default function Settings() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              Delete Account
-                            </AlertDialogTitle>
+                            <AlertDialogTitle>Delete Account</AlertDialogTitle>
                             <AlertDialogDescription>
                               This action cannot be undone. This will
                               permanently delete your account and remove all

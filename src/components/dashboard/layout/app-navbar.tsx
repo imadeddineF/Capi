@@ -5,7 +5,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ModeToggle } from "@/components/shared/mode-toggle-btn";
 import { Button } from "@/components/ui/button";
 import {
-  Settings,
   Share2,
   Download,
   Copy,
@@ -15,15 +14,14 @@ import {
   Wifi,
   WifiOff,
   CheckCircle,
-  AlertCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { getUrlParam, setUrlParam } from "@/utils/url-params";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { getUrlParam } from "@/utils/url-params";
+// import {
+//   Popover,
+//   PopoverContent,
+//   PopoverTrigger,
+// } from "@/components/ui/popover";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,7 +72,7 @@ interface DatabaseResponse {
 export const DashboardNavbar = () => {
   const pathName = usePathname();
   const router = useRouter();
-  const [copy, isCopied] = useCopyToClipboard();
+  const [copy] = useCopyToClipboard();
   const [chatId, setChatId] = useState<string | null>(null);
   const [chatTitle, setChatTitle] = useState<string>("Dashboard");
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
@@ -296,7 +294,7 @@ export const DashboardNavbar = () => {
     }
   };
 
-  const connectionStatus = getConnectionStatus();
+  // const connectionStatus = getConnectionStatus();
 
   const handleDbConnect = async () => {
     setDbLoading(true);
@@ -318,7 +316,7 @@ export const DashboardNavbar = () => {
         ]);
         setDbLoading(false);
       }, 1200);
-    } catch (e) {
+    } catch {
       setDbError("Failed to connect to database.");
       setDbLoading(false);
     }
@@ -553,10 +551,6 @@ export const DashboardNavbar = () => {
         >
           <Share2 className="w-4 h-4" />
           Share
-        </Button>
-
-        <Button variant="ghost" size="sm">
-          <Settings className="w-4 h-4" />
         </Button>
 
         <DropdownMenu>

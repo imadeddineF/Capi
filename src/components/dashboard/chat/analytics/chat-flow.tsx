@@ -12,12 +12,11 @@ import {
   Background,
   Handle,
   Position,
-  NodeProps,
   ConnectionMode,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { motion } from "framer-motion";
-import { Bot, User, MessageSquare, Clock } from "lucide-react";
+import { Bot, User, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ChatMessage {
@@ -146,7 +145,10 @@ export function ChatFlow({
             message.content.length > 150
               ? message.content.substring(0, 150) + "..."
               : message.content,
-          timestamp: message.timestamp.toLocaleTimeString([], {
+          timestamp: (message.timestamp instanceof Date
+            ? message.timestamp
+            : new Date(message.timestamp)
+          ).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
           }),
@@ -197,7 +199,7 @@ export function ChatFlow({
     return { nodes: flowNodes, edges: flowEdges };
   }, [messages, customFlowData]);
 
-  const [flowNodes, setNodes, onNodesChange] = useNodesState(nodes);
+  const [flowNodes, , onNodesChange] = useNodesState(nodes);
   const [flowEdges, setEdges, onEdgesChange] = useEdgesState(edges);
 
   const onConnect = useCallback(

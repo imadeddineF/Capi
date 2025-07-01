@@ -51,7 +51,7 @@ export const useLogin = () => {
 
 // Register mutation
 export const useRegister = () => {
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
   const router = useRouter();
 
   return useMutation({

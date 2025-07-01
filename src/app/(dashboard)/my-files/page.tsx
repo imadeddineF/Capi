@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,7 +32,6 @@ import {
   Share2,
   Trash2,
   Eye,
-  Calendar,
   User,
   Grid3X3,
   List,
@@ -40,10 +39,8 @@ import {
   FolderPlus,
   Folder,
   Clock,
-  Filter,
   Star,
   StarOff,
-  Plus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { showToast } from "@/components/custom-ui/toast";
@@ -129,15 +126,17 @@ export default function MyFiles() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState<"name" | "date" | "size">("date");
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
-  const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] = useState(false);
+  const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] =
+    useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [starred, setStarred] = useState<{ [id: string]: boolean }>({});
 
-  const filteredFiles = files.filter((file) =>
-    file.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    file.tags.some((tag) =>
-      tag.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+  const filteredFiles = files.filter(
+    (file) =>
+      file.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      file.tags.some((tag) =>
+        tag.toLowerCase().includes(searchQuery.toLowerCase())
+      )
   );
 
   const sortedFiles = [...filteredFiles].sort((a, b) => {
@@ -282,7 +281,9 @@ export default function MyFiles() {
                 variant={viewMode === "grid" ? "default" : "outline"}
                 size="icon"
                 onClick={() => setViewMode("grid")}
-                className={viewMode === "grid" ? "bg-imad hover:bg-imad/90" : ""}
+                className={
+                  viewMode === "grid" ? "bg-imad hover:bg-imad/90" : ""
+                }
               >
                 <Grid3X3 className="w-4 h-4" />
               </Button>
@@ -290,7 +291,9 @@ export default function MyFiles() {
                 variant={viewMode === "list" ? "default" : "outline"}
                 size="icon"
                 onClick={() => setViewMode("list")}
-                className={viewMode === "list" ? "bg-imad hover:bg-imad/90" : ""}
+                className={
+                  viewMode === "list" ? "bg-imad hover:bg-imad/90" : ""
+                }
               >
                 <List className="w-4 h-4" />
               </Button>
@@ -340,7 +343,8 @@ export default function MyFiles() {
                 animate={{ opacity: 1, y: 0 }}
                 className={cn(
                   "group",
-                  viewMode === "list" && "flex items-center gap-4 p-3 hover:bg-muted/50 rounded-lg"
+                  viewMode === "list" &&
+                    "flex items-center gap-4 p-3 hover:bg-muted/50 rounded-lg"
                 )}
               >
                 {viewMode === "grid" ? (
@@ -373,25 +377,33 @@ export default function MyFiles() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
-                                onClick={() => handleFileAction("view", file.id)}
+                                onClick={() =>
+                                  handleFileAction("view", file.id)
+                                }
                               >
                                 <Eye className="w-4 h-4 mr-2" />
                                 View
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => handleFileAction("download", file.id)}
+                                onClick={() =>
+                                  handleFileAction("download", file.id)
+                                }
                               >
                                 <Download className="w-4 h-4 mr-2" />
                                 Download
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => handleFileAction("share", file.id)}
+                                onClick={() =>
+                                  handleFileAction("share", file.id)
+                                }
                               >
                                 <Share2 className="w-4 h-4 mr-2" />
                                 Share
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => handleFileAction("delete", file.id)}
+                                onClick={() =>
+                                  handleFileAction("delete", file.id)
+                                }
                                 className="text-destructive"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
@@ -428,7 +440,10 @@ export default function MyFiles() {
                           </Badge>
                         ))}
                         {file.tags.length > 2 && (
-                          <Badge variant="outline" className="text-xs px-1 py-0">
+                          <Badge
+                            variant="outline"
+                            className="text-xs px-1 py-0"
+                          >
                             +{file.tags.length - 2}
                           </Badge>
                         )}
@@ -506,7 +521,9 @@ export default function MyFiles() {
                             View
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleFileAction("download", file.id)}
+                            onClick={() =>
+                              handleFileAction("download", file.id)
+                            }
                           >
                             <Download className="w-4 h-4 mr-2" />
                             Download
@@ -558,15 +575,16 @@ export default function MyFiles() {
             >
               Cancel
             </Button>
-            <Button className="bg-imad hover:bg-imad/90">
-              Upload
-            </Button>
+            <Button className="bg-imad hover:bg-imad/90">Upload</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Create Folder Dialog */}
-      <Dialog open={isCreateFolderDialogOpen} onOpenChange={setIsCreateFolderDialogOpen}>
+      <Dialog
+        open={isCreateFolderDialogOpen}
+        onOpenChange={setIsCreateFolderDialogOpen}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Folder</DialogTitle>

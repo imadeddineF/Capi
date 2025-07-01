@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -134,7 +134,7 @@ const categoryColors = {
 };
 
 export default function Marketplace() {
-  const [items, setItems] = useState<MarketplaceItem[]>(mockItems);
+  const [items] = useState<MarketplaceItem[]>(mockItems);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState<
@@ -181,10 +181,10 @@ export default function Marketplace() {
     );
   };
 
-  const handlePreview = (item: MarketplaceItem) => {
-    setSelectedItem(item);
-    setIsPreviewOpen(true);
-  };
+  // const handlePreview = (item: MarketplaceItem) => {
+  //   setSelectedItem(item);
+  //   setIsPreviewOpen(true);
+  // };
 
   return (
     <div className="min-h-screen bg-background">

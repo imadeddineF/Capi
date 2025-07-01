@@ -88,10 +88,10 @@ export function NavMain({
     Record<string, boolean>
   >({});
 
-  const handleNewChat = () => {
-    const newChatId = uuidv4();
-    router.push(`/chat?id=${newChatId}`);
-  };
+  // const handleNewChat = () => {
+  //   const newChatId = uuidv4();
+  //   router.push(`/chat?id=${newChatId}`);
+  // };
 
   const groupHistoryByDate = (items: HistoryItem[]) => {
     const now = new Date();

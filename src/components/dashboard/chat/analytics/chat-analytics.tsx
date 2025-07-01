@@ -1,13 +1,11 @@
 "use client";
 
-import React, { useMemo } from 'react';
+import React, { useMemo } from "react";
 import {
   LineChart,
   Line,
   AreaChart,
   Area,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -16,15 +14,15 @@ import {
   PieChart,
   Pie,
   Cell,
-} from 'recharts';
-import { motion } from 'framer-motion';
-import { TrendingUp, MessageSquare, Clock, BarChart3 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+} from "recharts";
+import { motion } from "framer-motion";
+import { TrendingUp, MessageSquare, BarChart3 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ChatMessage {
   id: string;
   content: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   timestamp: Date;
 }
 
@@ -33,17 +31,26 @@ interface ChatAnalyticsProps {
 }
 
 interface AnalyticsData {
-  messageFrequency: Array<{ time: string; user: number; assistant: number; total: number }>;
-  engagementTrends: Array<{ period: string; engagement: number; responseTime: number }>;
+  messageFrequency: Array<{
+    time: string;
+    user: number;
+    assistant: number;
+    total: number;
+  }>;
+  engagementTrends: Array<{
+    period: string;
+    engagement: number;
+    responseTime: number;
+  }>;
   messageDistribution: Array<{ name: string; value: number; color: string }>;
   hourlyActivity: Array<{ hour: string; messages: number }>;
 }
 
 const COLORS = {
-  user: '#8b5cf6',
-  assistant: '#ec4899',
-  total: '#06b6d4',
-  engagement: '#10b981',
+  user: "#8b5cf6",
+  assistant: "#ec4899",
+  total: "#06b6d4",
+  engagement: "#10b981",
 };
 
 export function ChatAnalytics({ messages }: ChatAnalyticsProps) {
@@ -74,11 +81,18 @@ export function ChatAnalytics({ messages }: ChatAnalyticsProps) {
         (msg) => msg.timestamp >= periodStart && msg.timestamp < periodEnd
       );
 
-      const userMessages = periodMessages.filter((msg) => msg.role === 'user').length;
-      const assistantMessages = periodMessages.filter((msg) => msg.role === 'assistant').length;
+      const userMessages = periodMessages.filter(
+        (msg) => msg.role === "user"
+      ).length;
+      const assistantMessages = periodMessages.filter(
+        (msg) => msg.role === "assistant"
+      ).length;
 
       return {
-        time: period.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        time: (period instanceof Date
+          ? period
+          : new Date(period)
+        ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         user: userMessages,
         assistant: assistantMessages,
         total: userMessages + assistantMessages,
@@ -87,23 +101,31 @@ export function ChatAnalytics({ messages }: ChatAnalyticsProps) {
 
     // Calculate engagement trends
     const engagementTrends = periods.map((period, index) => {
-      const engagement = Math.max(0, messageFrequency[index]?.total || 0) * 10 + Math.random() * 20;
+      const engagement =
+        Math.max(0, messageFrequency[index]?.total || 0) * 10 +
+        Math.random() * 20;
       const responseTime = 1000 + Math.random() * 2000; // Simulated response time
 
       return {
-        period: period.toLocaleTimeString([], { hour: '2-digit' }),
+        period: period.toLocaleTimeString([], { hour: "2-digit" }),
         engagement: Math.round(engagement),
         responseTime: Math.round(responseTime),
       };
     });
 
     // Message distribution
-    const userCount = messages.filter((msg) => msg.role === 'user').length;
-    const assistantCount = messages.filter((msg) => msg.role === 'assistant').length;
+    const userCount = messages.filter((msg) => msg.role === "user").length;
+    const assistantCount = messages.filter(
+      (msg) => msg.role === "assistant"
+    ).length;
 
     const messageDistribution = [
-      { name: 'User Messages', value: userCount, color: COLORS.user },
-      { name: 'Assistant Messages', value: assistantCount, color: COLORS.assistant },
+      { name: "User Messages", value: userCount, color: COLORS.user },
+      {
+        name: "Assistant Messages",
+        value: assistantCount,
+        color: COLORS.assistant,
+      },
     ];
 
     // Hourly activity
@@ -113,7 +135,7 @@ export function ChatAnalytics({ messages }: ChatAnalyticsProps) {
       ).length;
 
       return {
-        hour: `${hour.toString().padStart(2, '0')}:00`,
+        hour: `${hour.toString().padStart(2, "0")}:00`,
         messages: hourMessages,
       };
     }).filter((item) => item.messages > 0);
@@ -203,16 +225,17 @@ export function ChatAnalytics({ messages }: ChatAnalyticsProps) {
           <CardContent>
             <ResponsiveContainer width="100%" height={150}>
               <AreaChart data={analyticsData.messageFrequency}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                <XAxis 
-                  dataKey="time" 
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#374151"
+                  opacity={0.3}
+                />
+                <XAxis
+                  dataKey="time"
                   tick={{ fontSize: 10 }}
                   stroke="#6b7280"
                 />
-                <YAxis 
-                  tick={{ fontSize: 10 }}
-                  stroke="#6b7280"
-                />
+                <YAxis tick={{ fontSize: 10 }} stroke="#6b7280" />
                 <Tooltip content={<CustomTooltip />} />
                 <Area
                   type="monotone"
@@ -249,16 +272,17 @@ export function ChatAnalytics({ messages }: ChatAnalyticsProps) {
           <CardContent>
             <ResponsiveContainer width="100%" height={150}>
               <LineChart data={analyticsData.engagementTrends}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                <XAxis 
-                  dataKey="period" 
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#374151"
+                  opacity={0.3}
+                />
+                <XAxis
+                  dataKey="period"
                   tick={{ fontSize: 10 }}
                   stroke="#6b7280"
                 />
-                <YAxis 
-                  tick={{ fontSize: 10 }}
-                  stroke="#6b7280"
-                />
+                <YAxis tick={{ fontSize: 10 }} stroke="#6b7280" />
                 <Tooltip content={<CustomTooltip />} />
                 <Line
                   type="monotone"
@@ -305,11 +329,13 @@ export function ChatAnalytics({ messages }: ChatAnalyticsProps) {
             <div className="flex justify-center gap-4 mt-2">
               {analyticsData.messageDistribution.map((entry, index) => (
                 <div key={index} className="flex items-center gap-1">
-                  <div 
-                    className="w-2 h-2 rounded-full" 
+                  <div
+                    className="w-2 h-2 rounded-full"
                     style={{ backgroundColor: entry.color }}
                   />
-                  <span className="text-xs text-muted-foreground">{entry.name}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {entry.name}
+                  </span>
                 </div>
               ))}
             </div>

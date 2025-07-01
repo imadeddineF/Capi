@@ -62,7 +62,7 @@ export default function SignUp() {
             toast.error(data.error || "Registration failed");
           }
         },
-        onError: (error) => {
+        onError: () => {
           toast.error("Registration failed. Please try again.");
         },
       }

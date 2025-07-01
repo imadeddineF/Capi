@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -73,7 +73,7 @@ export default function ChatPageContent() {
   const [selectedAgent, setSelectedAgent] = useState("agent-1");
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [dragCounter, setDragCounter] = useState(0);
+  const [, setDragCounter] = useState(0);
 
   // Display options state
   const [showTimestamps, setShowTimestamps] = useState(true);
@@ -155,7 +155,16 @@ export default function ChatPageContent() {
       if (event.detail.action === "create" && event.detail.chatId === chatId) {
         // Handle new chat creation
         console.log("Loading newly created chat:", event.detail.newChat);
-        setCurrentChat(event.detail.newChat);
+        // Ensure proper timestamp conversion for newly created chat
+        const processedChat = {
+          ...event.detail.newChat,
+          createdAt: ensureTimestamp(event.detail.newChat.createdAt),
+          messages: event.detail.newChat.messages.map((msg: any) => ({
+            ...msg,
+            timestamp: ensureTimestamp(msg.timestamp),
+          })),
+        };
+        setCurrentChat(processedChat);
       } else if (
         event.detail.action === "navigate" &&
         event.detail.chatId === chatId
@@ -165,7 +174,16 @@ export default function ChatPageContent() {
           const stored = localStorage.getItem(`chat_${chatId}`);
           if (stored) {
             const chat = JSON.parse(stored);
-            setCurrentChat(chat);
+            // Ensure proper timestamp conversion
+            const processedChat = {
+              ...chat,
+              createdAt: ensureTimestamp(chat.createdAt),
+              messages: chat.messages.map((msg: any) => ({
+                ...msg,
+                timestamp: ensureTimestamp(msg.timestamp),
+              })),
+            };
+            setCurrentChat(processedChat);
           }
         }
       } else if (
@@ -177,7 +195,16 @@ export default function ChatPageContent() {
           const stored = localStorage.getItem(`chat_${chatId}`);
           if (stored) {
             const chat = JSON.parse(stored);
-            setCurrentChat(chat);
+            // Ensure proper timestamp conversion
+            const processedChat = {
+              ...chat,
+              createdAt: ensureTimestamp(chat.createdAt),
+              messages: chat.messages.map((msg: any) => ({
+                ...msg,
+                timestamp: ensureTimestamp(msg.timestamp),
+              })),
+            };
+            setCurrentChat(processedChat);
           }
         }
       }
@@ -316,24 +343,36 @@ export default function ChatPageContent() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const loadChatFromStorage = (id: string): Chat | null => {
+  // Utility function to ensure timestamp is always a Date object
+  const ensureTimestamp = (timestamp: any): Date => {
+    if (timestamp instanceof Date) {
+      return timestamp;
+    }
+    if (typeof timestamp === "string" || typeof timestamp === "number") {
+      return new Date(timestamp);
+    }
+    // Fallback to current date if timestamp is invalid
+    return new Date();
+  };
+
+  const loadChatFromStorage = useCallback((id: string): Chat | null => {
     if (typeof window === "undefined") return null;
     const stored = localStorage.getItem(`chat_${id}`);
     if (stored) {
       const chat = JSON.parse(stored);
       return {
         ...chat,
-        createdAt: new Date(chat.createdAt),
+        createdAt: ensureTimestamp(chat.createdAt),
         messages: chat.messages.map((msg: any) => ({
           ...msg,
-          timestamp: new Date(msg.timestamp),
+          timestamp: ensureTimestamp(msg.timestamp),
         })),
       };
     }
     return null;
-  };
+  }, []);
 
-  const saveChatToStorage = (chat: Chat) => {
+  const saveChatToStorage = useCallback((chat: Chat) => {
     if (typeof window === "undefined") return;
     localStorage.setItem(`chat_${chat.id}`, JSON.stringify(chat));
     window.dispatchEvent(
@@ -341,7 +380,7 @@ export default function ChatPageContent() {
         detail: { chatId: chat.id, action: "save" },
       })
     );
-  };
+  }, []);
 
   // File handling functions
   const handleFileSelect = (files: FileList) => {
@@ -592,12 +631,13 @@ export default function ChatPageContent() {
     showToast.success("Agent updated", `Switched to ${agent}`);
   };
 
-  const handleToggleTimestamps = () => setShowTimestamps(!showTimestamps);
-  const handleToggleAvatars = () => setShowAvatars(!showAvatars);
-  const handleToggleCompactMode = () => setCompactMode(!compactMode);
-  const handleToggleDarkMode = () => setDarkMode(!darkMode);
-  const handleFontSizeChange = (size: "small" | "medium" | "large") =>
-    setFontSize(size);
+  // These functions are kept for future use in settings or context menus
+  // const handleToggleTimestamps = () => setShowTimestamps(!showTimestamps);
+  // const handleToggleAvatars = () => setShowAvatars(!showAvatars);
+  // const handleToggleCompactMode = () => setCompactMode(!compactMode);
+  // const handleToggleDarkMode = () => setDarkMode(!darkMode);
+  // const handleFontSizeChange = (size: "small" | "medium" | "large") =>
+  //   setFontSize(size);
 
   if (!currentChat) {
     return (
@@ -924,7 +964,7 @@ export default function ChatPageContent() {
               </div>
             ) : (
               <div className="max-w-4xl mx-auto p-6 space-y-8">
-                {currentChat.messages.map((msg, index) => (
+                {currentChat.messages.map((msg) => (
                   <div
                     key={msg.id}
                     className={cn(
@@ -1114,10 +1154,13 @@ export default function ChatPageContent() {
                       >
                         {showTimestamps && (
                           <span className="text-muted-foreground">
-                            {msg.timestamp.toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
+                            {ensureTimestamp(msg.timestamp).toLocaleTimeString(
+                              [],
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
                           </span>
                         )}
                         {msg.role === "user" && (

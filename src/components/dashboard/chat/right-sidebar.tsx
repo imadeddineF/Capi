@@ -6,15 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Workflow,
-  BarChart3,
   FileTextIcon,
   FileCheck,
   Download,
   Share2,
   Copy,
   Settings,
-  X,
   GitBranch,
   TrendingUp,
 } from "lucide-react";
@@ -49,7 +46,7 @@ export function RightSidebar() {
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
   const [chatId, setChatId] = useState<string | null>(null);
   const [copy] = useCopyToClipboard();
-  const [selectedLanguage, setSelectedLanguage] = useState("Python");
+  const [selectedLanguage] = useState("Python");
   const pathname = usePathname();
 
   useEffect(() => {
