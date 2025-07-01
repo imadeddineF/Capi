@@ -15,12 +15,17 @@ import {
   Copy,
   Settings,
   X,
+  GitBranch,
+  TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRightSidebar } from "./right-sidebar-context";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { showToast } from "@/components/custom-ui/toast";
 import { getUrlParam } from "@/utils/url-params";
+import { ChatFlow } from "./analytics/chat-flow";
+import { ChatAnalytics } from "./analytics/chat-analytics";
+import { TranscriptView } from "./analytics/transcript-view";
 
 interface Chat {
   id: string;
@@ -30,9 +35,9 @@ interface Chat {
 }
 
 const tabs = [
-  { id: "workflow", label: "Workflow", icon: Workflow },
-  { id: "diagrams", label: "Diagrams", icon: BarChart3 },
-  { id: "plain-text", label: "Text", icon: FileTextIcon },
+  { id: "workflow", label: "Flow", icon: GitBranch },
+  { id: "analytics", label: "Analytics", icon: TrendingUp },
+  { id: "transcript", label: "Transcript", icon: FileTextIcon },
   { id: "resume", label: "Resume", icon: FileCheck },
 ];
 
@@ -207,29 +212,15 @@ export function RightSidebar() {
                       <Card>
                         <CardHeader className="pb-3">
                           <CardTitle className="text-base flex items-center gap-2">
-                            <Workflow className="w-4 h-4" />
-                            Analysis Workflow
+                            <GitBranch className="w-4 h-4" />
+                            Conversation Flow
                           </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-3">
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-sm">
-                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                              <span>Data Loading</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                              <span>Preprocessing</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                              <span>Analysis</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                              <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-                              <span>Visualization</span>
-                            </div>
-                          </div>
+                        <CardContent>
+                          <ChatFlow 
+                            messages={currentChat?.messages || []} 
+                            className="h-80"
+                          />
                         </CardContent>
                       </Card>
 
@@ -284,78 +275,16 @@ export function RightSidebar() {
                     </>
                   )}
 
-                  {activeTab === "diagrams" && (
-                    <Card>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-base flex items-center gap-2">
-                          <BarChart3 className="w-4 h-4" />
-                          Generated Charts
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="space-y-2">
-                          <div className="p-3 border rounded-lg bg-muted/30">
-                            <div className="text-sm font-medium">
-                              Sales Trend
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              Line Chart
-                            </div>
-                          </div>
-                          <div className="p-3 border rounded-lg bg-muted/30">
-                            <div className="text-sm font-medium">
-                              Customer Distribution
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              Pie Chart
-                            </div>
-                          </div>
-                          <div className="p-3 border rounded-lg bg-muted/30">
-                            <div className="text-sm font-medium">
-                              Performance Metrics
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              Bar Chart
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                  {activeTab === "analytics" && (
+                    <ChatAnalytics messages={currentChat?.messages || []} />
                   )}
 
-                  {activeTab === "plain-text" && (
-                    <Card>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-base flex items-center gap-2">
-                          <FileTextIcon className="w-4 h-4" />
-                          Text Summary
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-sm space-y-3">
-                          {currentChat?.messages?.length ? (
-                            currentChat.messages
-                              .filter((msg) => msg.role === "assistant")
-                              .slice(-3)
-                              .map((msg, index) => (
-                                <p
-                                  key={index}
-                                  className="text-muted-foreground"
-                                >
-                                  {msg.content.length > 150
-                                    ? msg.content.substring(0, 150) + "..."
-                                    : msg.content}
-                                </p>
-                              ))
-                          ) : (
-                            <p className="text-muted-foreground">
-                              No analysis content available yet. Start a
-                              conversation to see summaries here.
-                            </p>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
+                  {activeTab === "transcript" && (
+                    <TranscriptView 
+                      messages={currentChat?.messages || []}
+                      chatTitle={currentChat?.title || "New Chat"}
+                      chatId={chatId || ""}
+                    />
                   )}
 
                   {activeTab === "resume" && (
