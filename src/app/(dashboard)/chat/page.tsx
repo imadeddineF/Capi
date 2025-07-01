@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useState, useEffect, useRef, Suspense } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -14,24 +14,20 @@ import {
   Edit,
   Check,
   X,
-  Sparkles,
-  Settings,
-  Users,
-  ChevronDown,
-  Upload,
   FileText,
-  X as XIcon,
+  XIcon,
+  CloudUpload,
+  File,
+  ImageIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { v4 as uuidv4 } from "uuid";
 import { ModelSelectorDropdown } from "@/components/dashboard/chat/model-selector-dropdown";
-import { DisplayOptionsDropdown } from "@/components/dashboard/chat/display-options-dropdown";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { getUrlParam, setUrlParam } from "@/utils/url-params";
 import { TextAnimate } from "@/components/magicui/text-animate";
 import { useRightSidebar } from "@/components/dashboard/chat/right-sidebar-context";
 import { RightSidebar } from "@/components/dashboard/chat/right-sidebar";
-import { Badge } from "@/components/ui/badge";
 import { showToast } from "@/components/custom-ui/toast";
 
 interface Message {
@@ -72,6 +68,7 @@ export default function ChatPageContent() {
   const [selectedAgent, setSelectedAgent] = useState("agent-1");
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [dragCounter, setDragCounter] = useState(0);
 
   // Display options state
   const [showTimestamps, setShowTimestamps] = useState(true);
@@ -94,7 +91,6 @@ export default function ChatPageContent() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const editTextareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const dropZoneRef = useRef<HTMLDivElement>(null);
 
   // Initialize chatId from URL parameters
   useEffect(() => {
@@ -227,26 +223,51 @@ export default function ChatPageContent() {
     return () => clearInterval(interval);
   }, [animatedWords.length]);
 
-  // Drag and drop handlers
+  // Enhanced drag and drop handlers - now covering entire page
   useEffect(() => {
+    const handleDragEnter = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Check if the dragged items contain files
+      if (e.dataTransfer?.types.includes("Files")) {
+        setDragCounter((prev) => prev + 1);
+        setIsDragOver(true);
+      }
+    };
+
     const handleDragOver = (e: DragEvent) => {
       e.preventDefault();
-      setIsDragOver(true);
+      e.stopPropagation();
+
+      if (e.dataTransfer?.types.includes("Files")) {
+        e.dataTransfer.dropEffect = "copy";
+      }
     };
 
     const handleDragLeave = (e: DragEvent) => {
       e.preventDefault();
-      if (!dropZoneRef.current?.contains(e.relatedTarget as Node)) {
-        setIsDragOver(false);
-      }
+      e.stopPropagation();
+
+      setDragCounter((prev) => {
+        const newCounter = prev - 1;
+        if (newCounter <= 0) {
+          setIsDragOver(false);
+          return 0;
+        }
+        return newCounter;
+      });
     };
 
     const handleDrop = (e: DragEvent) => {
       e.preventDefault();
+      e.stopPropagation();
+
+      setDragCounter(0);
       setIsDragOver(false);
 
       const files = e.dataTransfer?.files;
-      if (files) {
+      if (files && files.length > 0) {
         handleFileSelect(files);
       }
     };
@@ -260,80 +281,21 @@ export default function ChatPageContent() {
       }
     };
 
-    const dropZone = dropZoneRef.current;
-    if (dropZone) {
-      dropZone.addEventListener("dragover", handleDragOver);
-      dropZone.addEventListener("dragleave", handleDragLeave);
-      dropZone.addEventListener("drop", handleDrop);
-      document.addEventListener("paste", handlePaste);
-    }
+    // Attach to document to cover entire page
+    document.addEventListener("dragenter", handleDragEnter);
+    document.addEventListener("dragover", handleDragOver);
+    document.addEventListener("dragleave", handleDragLeave);
+    document.addEventListener("drop", handleDrop);
+    document.addEventListener("paste", handlePaste);
 
     return () => {
-      if (dropZone) {
-        dropZone.removeEventListener("dragover", handleDragOver);
-        dropZone.removeEventListener("dragleave", handleDragLeave);
-        dropZone.removeEventListener("drop", handleDrop);
-        document.removeEventListener("paste", handlePaste);
-      }
+      document.removeEventListener("dragenter", handleDragEnter);
+      document.removeEventListener("dragover", handleDragOver);
+      document.removeEventListener("dragleave", handleDragLeave);
+      document.removeEventListener("drop", handleDrop);
+      document.removeEventListener("paste", handlePaste);
     };
   }, []);
-
-  // Auto-generate demo chat on first load
-  useEffect(() => {
-    if (currentChat && currentChat.messages.length === 0 && !chatId) {
-      generateDemoChat();
-    }
-  }, [currentChat, chatId]);
-
-  const generateDemoChat = () => {
-    const demoMessages: Message[] = [
-      {
-        id: uuidv4(),
-        content:
-          "I've uploaded a sales dataset with customer information. Can you help me analyze the trends and create visualizations?",
-        role: "user",
-        timestamp: new Date(Date.now() - 300000), // 5 minutes ago
-        attachments: [
-          {
-            id: uuidv4(),
-            name: "sales_data_2024.csv",
-            size: 2400000,
-            type: "text/csv",
-          },
-        ],
-      },
-      {
-        id: uuidv4(),
-        content:
-          "I'll analyze your sales dataset and create comprehensive visualizations. Let me examine the data structure first.\n\n**Data Overview:**\n- 15,847 sales records\n- 12 columns including customer demographics, product categories, and revenue\n- Date range: January 2024 - December 2024\n\n**Key Findings:**\n1. **Revenue Growth**: 23% increase compared to 2023\n2. **Top Product Category**: Electronics (34% of total sales)\n3. **Peak Sales Month**: November (Black Friday impact)\n4. **Customer Segments**: Premium customers drive 67% of revenue\n\n**Visualizations Created:**\n- Monthly revenue trend chart\n- Product category breakdown\n- Customer segmentation analysis\n- Geographic sales distribution\n\nWould you like me to dive deeper into any specific aspect of the analysis?",
-        role: "assistant",
-        timestamp: new Date(Date.now() - 240000), // 4 minutes ago
-      },
-      {
-        id: uuidv4(),
-        content:
-          "This is excellent! Can you create a React Flow diagram showing the customer journey from acquisition to purchase?",
-        role: "user",
-        timestamp: new Date(Date.now() - 180000), // 3 minutes ago
-      },
-      {
-        id: uuidv4(),
-        content:
-          "I've created an interactive React Flow diagram showing the customer journey! Here's what the flow reveals:\n\n**Customer Journey Stages:**\n\n🎯 **Acquisition** → 📱 **Awareness** → 🔍 **Consideration** → 🛒 **Purchase** → 💝 **Retention**\n\n**Key Insights from the Flow:**\n- 68% of customers discover us through social media\n- Average consideration time: 5.2 days\n- Mobile users have 34% higher conversion rates\n- Email campaigns drive 45% of repeat purchases\n\n**Optimization Opportunities:**\n1. **Reduce friction** in the consideration phase\n2. **Enhance mobile experience** for better conversions\n3. **Personalize email campaigns** for higher retention\n\nThe interactive diagram shows conversion rates at each stage and allows you to explore different customer paths. You can see this visualization in the right sidebar under the 'Flow' tab!",
-        role: "assistant",
-        timestamp: new Date(Date.now() - 120000), // 2 minutes ago
-      },
-    ];
-
-    if (currentChat) {
-      const updatedChat = {
-        ...currentChat,
-        messages: demoMessages,
-        title: "Sales Data Analysis & Customer Journey",
-      };
-      setCurrentChat(updatedChat);
-    }
-  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -403,7 +365,21 @@ export default function ChatPageContent() {
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    return (
+      Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+    );
+  };
+
+  const getFileIcon = (type: string) => {
+    if (type.startsWith("image/")) return ImageIcon;
+    if (type.includes("pdf")) return FileText;
+    if (
+      type.includes("csv") ||
+      type.includes("excel") ||
+      type.includes("sheet")
+    )
+      return FileText;
+    return File;
   };
 
   const handleSendMessage = async () => {
@@ -631,27 +607,189 @@ export default function ChatPageContent() {
 
   return (
     <Suspense fallback={<div>Loading chat...</div>}>
-      <div
-        ref={dropZoneRef}
-        className={cn(
-          "flex h-full bg-background relative transition-all duration-300",
-          isDragOver && "bg-blue-50 border-2 border-dashed border-blue-300"
-        )}
-      >
-        {/* Drag overlay */}
-        {isDragOver && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-blue-50/90 backdrop-blur-sm">
-            <div className="text-center">
-              <Upload className="w-16 h-16 mx-auto mb-4 text-blue-500" />
-              <p className="text-xl font-semibold text-blue-700">
-                Drop files here to upload
-              </p>
-              <p className="text-blue-600">
-                CSV, Excel, PDF, and more supported
-              </p>
-            </div>
-          </div>
-        )}
+      <div className="flex h-full bg-background relative">
+        {/* Enhanced Drag Overlay - Covers entire viewport */}
+        <AnimatePresence>
+          {isDragOver && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[9999] flex items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 50%, rgba(236, 72, 153, 0.1) 100%)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+              }}
+            >
+              {/* Animated Background Elements */}
+              <div className="absolute inset-0 overflow-hidden">
+                {/* Floating Particles */}
+                {[...Array(20)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full opacity-30"
+                    initial={{
+                      x: Math.random() * window.innerWidth,
+                      y: Math.random() * window.innerHeight,
+                      scale: 0,
+                    }}
+                    animate={{
+                      y: [null, Math.random() * window.innerHeight],
+                      x: [null, Math.random() * window.innerWidth],
+                      scale: [0, 1, 0],
+                      rotate: [0, 360],
+                    }}
+                    transition={{
+                      duration: 3 + Math.random() * 2,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "easeInOut",
+                    }}
+                  />
+                ))}
+
+                {/* Ripple Effect */}
+                <motion.div
+                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                  initial={{ scale: 0, opacity: 0.8 }}
+                  animate={{ scale: [0, 2, 4], opacity: [0.8, 0.3, 0] }}
+                  transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+                >
+                  <div className="w-96 h-96 border-4 border-gradient-to-r from-blue-400 to-purple-500 rounded-full" />
+                </motion.div>
+
+                <motion.div
+                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                  initial={{ scale: 0, opacity: 0.6 }}
+                  animate={{ scale: [0, 1.5, 3], opacity: [0.6, 0.2, 0] }}
+                  transition={{
+                    duration: 2,
+                    repeat: Number.POSITIVE_INFINITY,
+                    delay: 0.5,
+                  }}
+                >
+                  <div className="w-96 h-96 border-4 border-gradient-to-r from-purple-400 to-pink-500 rounded-full" />
+                </motion.div>
+              </div>
+
+              {/* Main Drop Zone Content */}
+              <motion.div
+                initial={{ scale: 0.8, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.8, y: 20 }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                className="relative z-10 flex flex-col items-center gap-6 p-12 rounded-3xl shadow-2xl border border-white/20 backdrop-blur-xl"
+                style={{
+                  background:
+                    "linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%)",
+                  boxShadow:
+                    "0 25px 50px -12px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+                }}
+              >
+                {/* Animated Upload Icon */}
+                <motion.div
+                  animate={{
+                    y: [0, -10, 0],
+                    rotate: [0, 5, -5, 0],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Number.POSITIVE_INFINITY,
+                    ease: "easeInOut",
+                  }}
+                  className="relative"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-xl opacity-50 animate-pulse" />
+                  <CloudUpload className="relative w-24 h-24 text-white drop-shadow-lg" />
+                </motion.div>
+
+                {/* Main Text */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-center"
+                >
+                  <h2 className="text-4xl font-bold text-white mb-3 drop-shadow-lg">
+                    Drop files anywhere
+                  </h2>
+                  <p className="text-xl text-white/90 mb-6 drop-shadow">
+                    Release to upload your files instantly
+                  </p>
+                </motion.div>
+
+                {/* File Type Icons */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="flex gap-4 mb-4"
+                >
+                  {[FileText, ImageIcon, File].map((Icon, index) => (
+                    <motion.div
+                      key={index}
+                      animate={{
+                        y: [0, -5, 0],
+                        rotate: [0, 10, -10, 0],
+                      }}
+                      transition={{
+                        duration: 1.5,
+                        repeat: Number.POSITIVE_INFINITY,
+                        delay: index * 0.2,
+                        ease: "easeInOut",
+                      }}
+                      className="p-3 bg-white/20 rounded-xl backdrop-blur-sm border border-white/30"
+                    >
+                      <Icon className="w-8 h-8 text-white" />
+                    </motion.div>
+                  ))}
+                </motion.div>
+
+                {/* Feature Tags */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="flex flex-wrap gap-3 justify-center"
+                >
+                  {[
+                    "CSV & Excel",
+                    "PDF Documents",
+                    "Images",
+                    "Max 10MB/file",
+                    "Multiple files",
+                  ].map((tag, index) => (
+                    <motion.span
+                      key={tag}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.4 + index * 0.1 }}
+                      className="px-4 py-2 bg-white/20 text-white text-sm font-medium rounded-full backdrop-blur-sm border border-white/30 shadow-lg"
+                    >
+                      {tag}
+                    </motion.span>
+                  ))}
+                </motion.div>
+
+                {/* Pulsing Border */}
+                <motion.div
+                  className="absolute inset-0 rounded-3xl border-2 border-gradient-to-r from-blue-400 via-purple-500 to-pink-500"
+                  animate={{
+                    opacity: [0.5, 1, 0.5],
+                    scale: [1, 1.02, 1],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Number.POSITIVE_INFINITY,
+                    ease: "easeInOut",
+                  }}
+                />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Main Chat Content */}
         <motion.div
@@ -707,26 +845,32 @@ export default function ChatPageContent() {
                     {/* Attachments */}
                     {attachments.length > 0 && (
                       <div className="px-4 pb-2 flex flex-wrap gap-2">
-                        {attachments.map((attachment) => (
-                          <div
-                            key={attachment.id}
-                            className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2 text-sm"
-                          >
-                            <FileText className="w-4 h-4 text-gray-600" />
-                            <span className="text-gray-700">
-                              {attachment.name}
-                            </span>
-                            <span className="text-gray-500">
-                              ({formatFileSize(attachment.size)})
-                            </span>
-                            <button
-                              onClick={() => removeAttachment(attachment.id)}
-                              className="text-gray-400 hover:text-red-500 ml-1"
+                        {attachments.map((attachment) => {
+                          const IconComponent = getFileIcon(attachment.type);
+                          return (
+                            <motion.div
+                              key={attachment.id}
+                              initial={{ scale: 0, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              exit={{ scale: 0, opacity: 0 }}
+                              className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg px-3 py-2 text-sm"
                             >
-                              <XIcon className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
+                              <IconComponent className="w-4 h-4 text-blue-600" />
+                              <span className="text-gray-700 font-medium">
+                                {attachment.name}
+                              </span>
+                              <span className="text-gray-500">
+                                ({formatFileSize(attachment.size)})
+                              </span>
+                              <button
+                                onClick={() => removeAttachment(attachment.id)}
+                                className="text-gray-400 hover:text-red-500 ml-1 transition-colors"
+                              >
+                                <XIcon className="w-4 h-4" />
+                              </button>
+                            </motion.div>
+                          );
+                        })}
                       </div>
                     )}
 
@@ -865,25 +1009,31 @@ export default function ChatPageContent() {
                                 {msg.attachments &&
                                   msg.attachments.length > 0 && (
                                     <div className="mt-3 space-y-2">
-                                      {msg.attachments.map((attachment) => (
-                                        <div
-                                          key={attachment.id}
-                                          className={cn(
-                                            "flex items-center gap-2 p-2 rounded-lg",
-                                            msg.role === "user"
-                                              ? "bg-white/20"
-                                              : "bg-muted/50"
-                                          )}
-                                        >
-                                          <FileText className="w-4 h-4" />
-                                          <span className="text-sm">
-                                            {attachment.name}
-                                          </span>
-                                          <span className="text-xs opacity-70">
-                                            ({formatFileSize(attachment.size)})
-                                          </span>
-                                        </div>
-                                      ))}
+                                      {msg.attachments.map((attachment) => {
+                                        const IconComponent = getFileIcon(
+                                          attachment.type
+                                        );
+                                        return (
+                                          <div
+                                            key={attachment.id}
+                                            className={cn(
+                                              "flex items-center gap-2 p-2 rounded-lg",
+                                              msg.role === "user"
+                                                ? "bg-white/20"
+                                                : "bg-muted/50"
+                                            )}
+                                          >
+                                            <IconComponent className="w-4 h-4" />
+                                            <span className="text-sm">
+                                              {attachment.name}
+                                            </span>
+                                            <span className="text-xs opacity-70">
+                                              ({formatFileSize(attachment.size)}
+                                              )
+                                            </span>
+                                          </div>
+                                        );
+                                      })}
                                     </div>
                                   )}
                               </div>
@@ -1028,18 +1178,6 @@ export default function ChatPageContent() {
                     onToolToggle={handleToolToggle}
                     onAgentSelect={handleAgentSelect}
                   />
-                  {/* <DisplayOptionsDropdown
-                    showTimestamps={showTimestamps}
-                    showAvatars={showAvatars}
-                    compactMode={compactMode}
-                    darkMode={darkMode}
-                    fontSize={fontSize}
-                    onToggleTimestamps={handleToggleTimestamps}
-                    onToggleAvatars={handleToggleAvatars}
-                    onToggleCompactMode={handleToggleCompactMode}
-                    onToggleDarkMode={handleToggleDarkMode}
-                    onFontSizeChange={handleFontSizeChange}
-                  /> */}
                 </div>
                 {/* Message Input */}
                 <div className="relative">
@@ -1057,24 +1195,32 @@ export default function ChatPageContent() {
                     {/* Attachments */}
                     {attachments.length > 0 && (
                       <div className="px-4 pb-2 flex flex-wrap gap-2">
-                        {attachments.map((attachment) => (
-                          <div
-                            key={attachment.id}
-                            className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2 text-sm"
-                          >
-                            <FileText className="w-4 h-4 text-muted-foreground" />
-                            <span>{attachment.name}</span>
-                            <span className="text-muted-foreground">
-                              ({formatFileSize(attachment.size)})
-                            </span>
-                            <button
-                              onClick={() => removeAttachment(attachment.id)}
-                              className="text-muted-foreground hover:text-destructive ml-1"
+                        {attachments.map((attachment) => {
+                          const IconComponent = getFileIcon(attachment.type);
+                          return (
+                            <motion.div
+                              key={attachment.id}
+                              initial={{ scale: 0, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              exit={{ scale: 0, opacity: 0 }}
+                              className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg px-3 py-2 text-sm"
                             >
-                              <XIcon className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
+                              <IconComponent className="w-4 h-4 text-blue-600" />
+                              <span className="font-medium">
+                                {attachment.name}
+                              </span>
+                              <span className="text-muted-foreground">
+                                ({formatFileSize(attachment.size)})
+                              </span>
+                              <button
+                                onClick={() => removeAttachment(attachment.id)}
+                                className="text-muted-foreground hover:text-destructive ml-1 transition-colors"
+                              >
+                                <XIcon className="w-4 h-4" />
+                              </button>
+                            </motion.div>
+                          );
+                        })}
                       </div>
                     )}
 
