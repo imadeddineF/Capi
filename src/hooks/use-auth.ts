@@ -67,7 +67,7 @@ export const useRegister = () => {
     onSuccess: (data: { success: boolean; user?: any; error?: string }) => {
       if (data.success) {
         // Redirect to login page after successful registration
-        router.push("/sign-in");
+        router.push("/chat");
         toast.success("Registration successful! Please sign in.");
       } else {
         toast.error(data.error || "Registration failed");

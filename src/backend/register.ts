@@ -3,12 +3,15 @@ import { BASEURL } from "@/utils/base-url";
 import Cookies from "js-cookie";
 
 interface RegisterResponse {
-  status: string;
+  status?: string;
   message: string;
   data: {
     id: number;
     email: string;
     name: string;
+    dataSource: any;
+    createdAt: string;
+    updatedAt: string;
   };
   code: number;
 }
@@ -32,16 +35,26 @@ export async function registerAction(
         headers: {
           "Content-Type": "application/json",
         },
-        withCredentials: true, // Include cookies in the request
-        timeout: 10000, // 10 second timeout
+        withCredentials: true,
       }
     );
 
     console.log("Response data:", response.data);
 
-    if (response.data.status === "success") {
-      const user = response.data.data;
-      return { success: true, user };
+    if (response.data.code < 400 && response.data.code >= 200) {
+      const userData = response.data.data;
+
+      const tokenOptions = {
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax" as const,
+        path: "/",
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+      };
+
+      //   Cookies.set("auth_token", token, tokenOptions);
+      Cookies.set("user_id", userData.id.toString(), tokenOptions);
+
+      return { success: true, user: userData };
     } else {
       return { success: false, error: response.data.message };
     }
