@@ -59,7 +59,7 @@ export default function ChatPageContent() {
 
   // Animation state for cycling text
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [animationKey, setAnimationKey] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -170,7 +170,7 @@ export default function ChatPageContent() {
     }
   }, [editingMessageId]);
 
-  // Cycling text animation effect
+  // Cycling text animation effect with smooth transitions
   const animatedWords = [
     "to uncover today?",
     "to explore next?",
@@ -182,11 +182,16 @@ export default function ChatPageContent() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentWordIndex(
-        (prevIndex) => (prevIndex + 1) % animatedWords.length
-      );
-      setAnimationKey((prev) => prev + 1);
-    }, 2500);
+      setIsAnimating(true);
+      
+      // Small delay to allow exit animation
+      setTimeout(() => {
+        setCurrentWordIndex(
+          (prevIndex) => (prevIndex + 1) % animatedWords.length
+        );
+        setIsAnimating(false);
+      }, 300);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [animatedWords.length]);
@@ -459,12 +464,21 @@ export default function ChatPageContent() {
             {isNewChat ? (
               <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center p-6">
                 <div className="mb-8">
-                  <h2 className="text-3xl font-bold mb-2 text-hiki flex items-center gap-2">
+                  <h2 className="text-3xl font-bold mb-2 text-hiki flex items-center gap-2 justify-center">
                     What would you like{" "}
-                    <span className="text-maria">
-                      <TextAnimate animation="blurInUp" by="word" once>
-                        {animatedWords[currentWordIndex]}
-                      </TextAnimate>
+                    <span className="text-maria inline-block min-w-[200px] text-left">
+                      {!isAnimating && (
+                        <TextAnimate 
+                          key={currentWordIndex}
+                          animation="blurInUp" 
+                          by="word" 
+                          once={false}
+                          duration={0.5}
+                          className="inline"
+                        >
+                          {animatedWords[currentWordIndex]}
+                        </TextAnimate>
+                      )}
                     </span>
                   </h2>
                 </div>
