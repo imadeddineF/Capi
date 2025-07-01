@@ -402,10 +402,12 @@ function Header() {
           action with generative AI, statistics, and smart business reasoning.
         </p>
 
-        <ShimmerButton className="!bg-gradient-to-r from-purple-600 to-purple-800 mx-auto">
-          Get Started Now
-          <ChevronDown className="w-5 h-5 ml-2 rotate-[-45deg]" />
-        </ShimmerButton>
+        <Link href={"/chat"}>
+          <ShimmerButton className="!bg-gradient-to-r from-purple-600 to-purple-800 mx-auto">
+            Get Started Now
+            <ChevronDown className="w-5 h-5 ml-2 rotate-[-45deg]" />
+          </ShimmerButton>
+        </Link>
       </div>
 
       {/* Hero Image */}
