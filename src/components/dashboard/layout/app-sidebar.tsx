@@ -279,7 +279,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="pt-4">
+      <SidebarContent className="pt-4 sidebar-toolbar">
         <div className={`${open ? "px-4" : "px-2"} mb-4`}>
           <Button
             onClick={handleNewChat}
@@ -312,7 +312,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       <SidebarFooter>
-        <NavUser user={testAdmin} />
+        <NavUser />
       </SidebarFooter>
 
       <SidebarRail />

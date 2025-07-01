@@ -214,7 +214,7 @@ export function RightSidebar() {
                         <CardContent className="space-y-3">
                           <div className="space-y-2">
                             <div className="flex items-center gap-2 text-sm">
-                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              <div className="w-2 h-2 bg-imad rounded-full"></div>
                               <span>Data Loading</span>
                             </div>
                             <div className="flex items-center gap-2 text-sm">
@@ -375,7 +375,7 @@ export function RightSidebar() {
                               </span>
                               <Badge
                                 variant="secondary"
-                                className="bg-green-100 text-green-800"
+                                className="bg-imad/10 text-imad"
                               >
                                 Active
                               </Badge>

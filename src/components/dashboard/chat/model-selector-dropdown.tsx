@@ -67,7 +67,7 @@ const AI_MODELS = [
     description: "Balanced performance and speed",
     icon: MessageSquare,
     badge: "",
-    color: "text-green-600",
+    color: "text-imad",
   },
   {
     id: "gemini-pro",
@@ -92,7 +92,7 @@ const AI_TOOLS = [
     name: "Code Interpreter",
     description: "Execute Python code and analyze data",
     icon: Code,
-    color: "text-green-600",
+    color: "text-imad",
   },
   {
     id: "web-search",

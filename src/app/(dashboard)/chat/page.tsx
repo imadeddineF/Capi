@@ -631,7 +631,7 @@ export default function ChatPageContent() {
                         )}
                         {msg.role === "user" && (
                           <div className="flex items-center gap-1">
-                            <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                            <div className="w-1.5 h-1.5 rounded-full bg-imad"></div>
                             <span className="text-muted-foreground">
                               {msg.isEdited ? "Edited" : "Delivered"}
                             </span>
@@ -658,7 +658,7 @@ export default function ChatPageContent() {
                             title="Copy message"
                           >
                             {isCopied ? (
-                              <Check className="w-3 h-3 text-green-500" />
+                              <Check className="w-3 h-3 text-imad" />
                             ) : (
                               <Copy className="w-3 h-3" />
                             )}
@@ -676,7 +676,7 @@ export default function ChatPageContent() {
                             title="Copy message"
                           >
                             {isCopied ? (
-                              <Check className="w-3 h-3 text-green-500" />
+                              <Check className="w-3 h-3 text-imad" />
                             ) : (
                               <Copy className="w-3 h-3" />
                             )}

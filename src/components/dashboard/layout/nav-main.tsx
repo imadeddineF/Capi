@@ -204,7 +204,7 @@ export function NavMain({
                         className={`group flex items-center justify-between rounded-md px-2 py-1 transition-colors cursor-pointer
                                                         ${
                                                           isActive
-                                                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                                            ? "bg-[var(--imad)] text-white"
                                                             : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                                                         }
                                                     `}
@@ -313,7 +313,7 @@ export function NavMain({
                         className={`group flex items-center justify-between rounded-md px-2 py-1 transition-colors cursor-pointer
                                                     ${
                                                       isActive
-                                                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                                        ? "bg-[var(--imad)] text-white"
                                                         : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                                                     }
                                                 `}
@@ -387,7 +387,11 @@ export function NavMain({
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton
                   tooltip={item.title}
-                  className="w-full justify-between"
+                  className={`w-full justify-between ${
+                    item.isActive || isItemActive(item.url)
+                      ? "bg-imad text-white"
+                      : ""
+                  }`}
                   isActive={item.isActive || isItemActive(item.url)}
                 >
                   <div className="flex items-center gap-2">

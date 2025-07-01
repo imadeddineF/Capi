@@ -19,25 +19,42 @@ import { ModeToggle } from "@/components/shared/mode-toggle-btn";
 import Image from "next/image";
 import logoIcon from "../../../../public/logo-icon.svg";
 import logoText from "../../../../public/logo-text.svg";
+import { useLogin } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     rememberMe: false,
   });
 
+  const loginMutation = useLogin();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Handle sign in logic here
-    }, 2000);
+    if (!formData.email || !formData.password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    loginMutation.mutate(
+      { email: formData.email, password: formData.password },
+      {
+        onSuccess: (data) => {
+          if (data.success) {
+            toast.success("Login successful!");
+          } else {
+            toast.error(data.error || "Login failed");
+          }
+        },
+        onError: (error) => {
+          toast.error("Login failed. Please try again.");
+        },
+      }
+    );
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -50,13 +67,13 @@ export default function SignIn() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between p-6 border-b">
+      {/* <header className="flex items-center justify-between p-6 border-b">
         <div className="flex items-center gap-2">
           <Image src={logoIcon} alt="Logo" className="h-8 w-8" />
           <Image src={logoText} alt="Logo Text" className="h-7" />
         </div>
         <ModeToggle />
-      </header>
+      </header> */}
 
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-6">
@@ -94,6 +111,7 @@ export default function SignIn() {
                       }
                       className="pl-10"
                       required
+                      disabled={loginMutation.isPending}
                     />
                   </div>
                 </div>
@@ -113,6 +131,7 @@ export default function SignIn() {
                       }
                       className="pl-10 pr-10"
                       required
+                      disabled={loginMutation.isPending}
                     />
                     <Button
                       type="button"
@@ -120,6 +139,7 @@ export default function SignIn() {
                       size="icon"
                       className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7"
                       onClick={() => setShowPassword(!showPassword)}
+                      disabled={loginMutation.isPending}
                     >
                       {showPassword ? (
                         <EyeOff className="w-4 h-4" />
@@ -139,6 +159,7 @@ export default function SignIn() {
                       onCheckedChange={(checked) =>
                         handleInputChange("rememberMe", checked as boolean)
                       }
+                      disabled={loginMutation.isPending}
                     />
                     <Label htmlFor="remember" className="text-sm">
                       Remember me
@@ -156,9 +177,9 @@ export default function SignIn() {
                 <Button
                   type="submit"
                   className="w-full bg-hiki hover:bg-hiki/90"
-                  disabled={isLoading}
+                  disabled={loginMutation.isPending}
                 >
-                  {isLoading ? (
+                  {loginMutation.isPending ? (
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       Signing in...
@@ -183,11 +204,19 @@ export default function SignIn() {
 
               {/* Social Buttons */}
               <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" className="w-full">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  disabled={loginMutation.isPending}
+                >
                   <Github className="w-4 h-4 mr-2" />
                   GitHub
                 </Button>
-                <Button variant="outline" className="w-full">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  disabled={loginMutation.isPending}
+                >
                   <Chrome className="w-4 h-4 mr-2" />
                   Google
                 </Button>
@@ -200,10 +229,7 @@ export default function SignIn() {
             <span className="text-muted-foreground">
               Don't have an account?{" "}
             </span>
-            <Link
-              href="/sign-up"
-              className="text-primary hover:underline font-medium"
-            >
+            <Link href="/sign-up" className="text-primary hover:underline">
               Sign up
             </Link>
           </div>

@@ -4,6 +4,7 @@ import "../styles/globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { NetworkProvider } from "@/providers/network-provider";
 import ReactQueryProvider from "@/providers/react-query-provider";
+import { AuthProvider } from "@/providers/auth-provider";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -39,8 +40,10 @@ export default function RootLayout({
         >
           <NetworkProvider>
             <ReactQueryProvider>
-              {children}
-              <Toaster position="top-right" richColors closeButton />
+              <AuthProvider>
+                {children}
+                <Toaster position="top-right" richColors closeButton />
+              </AuthProvider>
             </ReactQueryProvider>
           </NetworkProvider>
         </ThemeProvider>
