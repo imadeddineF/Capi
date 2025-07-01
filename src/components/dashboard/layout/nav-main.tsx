@@ -208,7 +208,18 @@ export function NavMain({
                                                             : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                                                         }
                                                     `}
-                        onClick={() => router.push(historyItem.url)}
+                        onClick={() => {
+                          router.push(historyItem.url);
+                          // Trigger storage change event to notify chat page
+                          window.dispatchEvent(
+                            new CustomEvent("chatStorageChanged", {
+                              detail: {
+                                chatId: historyItem.url.split("=")[1],
+                                action: "navigate",
+                              },
+                            })
+                          );
+                        }}
                       >
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <MessageSquare className="h-3 w-3 text-muted-foreground flex-shrink-0" />
@@ -306,7 +317,18 @@ export function NavMain({
                                                         : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                                                     }
                                                 `}
-                        onClick={() => router.push(chat.url)}
+                        onClick={() => {
+                          router.push(chat.url);
+                          // Trigger storage change event to notify chat page
+                          window.dispatchEvent(
+                            new CustomEvent("chatStorageChanged", {
+                              detail: {
+                                chatId: chat.url.split("=")[1],
+                                action: "navigate",
+                              },
+                            })
+                          );
+                        }}
                       >
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <MessageSquare className="h-3 w-3 text-muted-foreground flex-shrink-0" />

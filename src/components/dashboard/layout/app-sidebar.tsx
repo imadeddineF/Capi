@@ -1,7 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { LayoutGrid, History, Workflow, Plus } from "lucide-react";
+import {
+  LayoutGrid,
+  History,
+  Workflow,
+  Plus,
+  Settings,
+  ShieldEllipsisIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -21,6 +28,22 @@ import logoText from "../../../../public/logo-text.svg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
+import { getUrlParam } from "@/utils/url-params";
+
+interface Chat {
+  id: string;
+  title: string;
+  messages: any[];
+  createdAt: Date;
+}
+
+interface HistoryItem {
+  title: string;
+  url: string;
+  date: Date;
+  type: string;
+  isActive?: boolean;
+}
 
 const data = {
   navMain: [
@@ -29,38 +52,7 @@ const data = {
       url: "#",
       icon: History,
       isActive: false,
-      items: [
-        {
-          title: "Data analysis and dataset overview",
-          url: "/chat?id=d4f6f32e-70c5-4a02-ae6d-f6727b494510",
-          date: new Date(),
-          type: "chat",
-        },
-        {
-          title: "Customer Support Analysis",
-          url: "/chat?id=a1b2c3d4-e5f6-7890-1234-567890abcdef",
-          date: new Date(Date.now() - 86400000),
-          type: "chat",
-        },
-        {
-          title: "Sales Data Processing",
-          url: "/chat?id=f9e8d7c6-b5a4-9382-7160-504938271605",
-          date: new Date(Date.now() - 172800000),
-          type: "chat",
-        },
-        {
-          title: "Weekly Report Generation",
-          url: "/chat?id=12345678-9abc-def0-1234-56789abcdef0",
-          date: new Date(Date.now() - 604800000),
-          type: "chat",
-        },
-        {
-          title: "Team Meeting Notes Analysis",
-          url: "/chat?id=abcdef01-2345-6789-abcd-ef0123456789",
-          date: new Date(Date.now() - 2592000000),
-          type: "chat",
-        },
-      ],
+      items: [] as HistoryItem[],
     },
     {
       title: "My Workflows",
@@ -100,8 +92,18 @@ const data = {
   projects: [
     {
       name: "My files",
-      url: "/chat/my-files",
+      url: "/my-files",
       icon: LayoutGrid,
+    },
+    {
+      name: "Marketplace",
+      url: "/marketplace",
+      icon: ShieldEllipsisIcon,
+    },
+    {
+      name: "Settings",
+      url: "/settings",
+      icon: Settings,
     },
   ],
 };
@@ -122,21 +124,128 @@ const testAdmin = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { open, state } = useSidebar();
   const router = useRouter();
-  //   const [selectedTab, setSelectedTab] = React.useState<string | null>(null);
-  const [historyData, setHistoryData] = React.useState(
-    data.navMain[0].items || []
-  );
+  const [historyData, setHistoryData] = React.useState<HistoryItem[]>([]);
+  const [currentChatId, setCurrentChatId] = React.useState<string | null>(null);
+
+  // Load chat history from localStorage
+  const loadChatHistory = React.useCallback(() => {
+    if (typeof window === "undefined") return [];
+
+    const history: HistoryItem[] = [];
+    const keys = Object.keys(localStorage);
+
+    keys.forEach((key) => {
+      if (key.startsWith("chat_")) {
+        try {
+          const stored = localStorage.getItem(key);
+          if (stored) {
+            const chat: Chat = JSON.parse(stored);
+            const chatId = key.replace("chat_", "");
+
+            history.push({
+              title: chat.title || "Untitled Chat",
+              url: `/chat?id=${chatId}`,
+              date: new Date(chat.createdAt),
+              type: "chat",
+              isActive: chatId === currentChatId,
+            });
+          }
+        } catch (error) {
+          console.error("Error parsing chat data:", error);
+        }
+      }
+    });
+
+    // Sort by date (newest first)
+    return history.sort((a, b) => b.date.getTime() - a.date.getTime());
+  }, [currentChatId]);
+
+  // Get current chat ID from URL
+  React.useEffect(() => {
+    const id = getUrlParam("id");
+    setCurrentChatId(id);
+  }, []);
+
+  // Listen for URL changes
+  React.useEffect(() => {
+    const handlePopState = () => {
+      const id = getUrlParam("id");
+      setCurrentChatId(id);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  // Load history when component mounts or currentChatId changes
+  React.useEffect(() => {
+    const history = loadChatHistory();
+    setHistoryData(history);
+  }, [loadChatHistory]);
+
+  // Listen for storage changes to update history
+  React.useEffect(() => {
+    const handleStorageChange = () => {
+      const history = loadChatHistory();
+      setHistoryData(history);
+    };
+
+    const handleChatStorageChange = () => {
+      const history = loadChatHistory();
+      setHistoryData(history);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("chatStorageChanged", handleChatStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("chatStorageChanged", handleChatStorageChange);
+    };
+  }, [loadChatHistory]);
 
   const handleDelete = (title: string) => {
-    setHistoryData((prev) => prev.filter((item) => item.title !== title));
+    // Find the chat with this title and delete it from localStorage
+    const chatToDelete = historyData.find((item) => item.title === title);
+    if (chatToDelete) {
+      const chatId = chatToDelete.url.split("=")[1];
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(`chat_${chatId}`);
+      }
+
+      // Update history
+      setHistoryData((prev) => prev.filter((item) => item.title !== title));
+
+      // If we're currently viewing the deleted chat, redirect to new chat
+      if (chatId === currentChatId) {
+        router.push("/chat");
+      }
+    }
   };
 
   const handleRename = (oldTitle: string, newTitle: string) => {
-    setHistoryData((prev) =>
-      prev.map((item) =>
-        item.title === oldTitle ? { ...item, title: newTitle } : item
-      )
-    );
+    // Find the chat with this title and update it in localStorage
+    const chatToRename = historyData.find((item) => item.title === oldTitle);
+    if (chatToRename) {
+      const chatId = chatToRename.url.split("=")[1];
+      if (typeof window !== "undefined") {
+        const stored = localStorage.getItem(`chat_${chatId}`);
+        if (stored) {
+          const chat: Chat = JSON.parse(stored);
+          chat.title = newTitle;
+          localStorage.setItem(`chat_${chatId}`, JSON.stringify(chat));
+        }
+      }
+
+      // Update history
+      setHistoryData((prev) =>
+        prev.map((item) =>
+          item.title === oldTitle ? { ...item, title: newTitle } : item
+        )
+      );
+    }
   };
 
   const handleNewChat = () => {
@@ -194,6 +303,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
         <NavMain
           items={updatedNavMain}
+          activeUrl={currentChatId ? `/chat?id=${currentChatId}` : undefined}
           onDeleteHistoryItem={handleDelete}
           onRenameHistoryItem={handleRename}
         />

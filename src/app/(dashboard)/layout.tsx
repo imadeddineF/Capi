@@ -4,6 +4,7 @@ import { DashboardNavbar } from "@/components/dashboard/layout/app-navbar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/dashboard/layout/app-sidebar";
+import { RightSidebarProvider } from "@/components/dashboard/chat/right-sidebar-context";
 
 export default function ChatLayout({
   children,
@@ -13,11 +14,13 @@ export default function ChatLayout({
   return (
     <TooltipProvider delayDuration={0}>
       <SidebarProvider>
-        <AppSidebar className="z-50" />
-        <main className="flex flex-col flex-1 w-full">
-          <DashboardNavbar />
-          <div className="flex-1 overflow-y-auto">{children}</div>
-        </main>
+        <RightSidebarProvider>
+          <AppSidebar className="z-50" />
+          <main className="flex flex-col flex-1 w-full">
+            <DashboardNavbar />
+            <div className="flex-1 overflow-hidden">{children}</div>
+          </main>
+        </RightSidebarProvider>
       </SidebarProvider>
     </TooltipProvider>
   );
