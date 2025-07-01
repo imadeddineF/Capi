@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from "react";
 import {
   ReactFlow,
   Node,
@@ -14,16 +14,16 @@ import {
   Position,
   NodeProps,
   ConnectionMode,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import { motion } from 'framer-motion';
-import { Bot, User, MessageSquare, Clock } from 'lucide-react';
-import { cn } from '@/lib/utils';
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+import { motion } from "framer-motion";
+import { Bot, User, MessageSquare, Clock } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ChatMessage {
   id: string;
   content: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   timestamp: Date;
 }
 
@@ -33,7 +33,11 @@ interface ChatFlowProps {
 }
 
 // Custom User Node
-const UserNode = ({ data }: NodeProps) => {
+const UserNode = ({
+  data,
+}: {
+  data: { content: string; timestamp: string };
+}) => {
   return (
     <motion.div
       initial={{ scale: 0.8, opacity: 0 }}
@@ -52,7 +56,11 @@ const UserNode = ({ data }: NodeProps) => {
 };
 
 // Custom Assistant Node
-const AssistantNode = ({ data }: NodeProps) => {
+const AssistantNode = ({
+  data,
+}: {
+  data: { content: string; timestamp: string };
+}) => {
   return (
     <motion.div
       initial={{ scale: 0.8, opacity: 0 }}
@@ -72,7 +80,7 @@ const AssistantNode = ({ data }: NodeProps) => {
 };
 
 // Custom Summary Node
-const SummaryNode = ({ data }: NodeProps) => {
+const SummaryNode = ({ data }: { data: { content: string } }) => {
   return (
     <motion.div
       initial={{ scale: 0.8, opacity: 0 }}
@@ -82,7 +90,9 @@ const SummaryNode = ({ data }: NodeProps) => {
       <Handle type="target" position={Position.Top} className="w-2 h-2" />
       <div className="flex items-center gap-2 mb-2">
         <MessageSquare className="w-4 h-4 text-maria" />
-        <span className="text-sm font-medium text-maria">Conversation Summary</span>
+        <span className="text-sm font-medium text-maria">
+          Conversation Summary
+        </span>
       </div>
       <p className="text-sm text-foreground">{data.content}</p>
     </motion.div>
@@ -99,74 +109,75 @@ export function ChatFlow({ messages, className }: ChatFlowProps) {
   const { nodes, edges } = useMemo(() => {
     const flowNodes: Node[] = [];
     const flowEdges: Edge[] = [];
-    
+
     let yPosition = 0;
     const nodeSpacing = 150;
-    
+
     messages.forEach((message, index) => {
       const nodeId = `node-${message.id}`;
-      const isUser = message.role === 'user';
-      
+      const isUser = message.role === "user";
+
       // Create node
       flowNodes.push({
         id: nodeId,
-        type: isUser ? 'userNode' : 'assistantNode',
-        position: { 
-          x: isUser ? 50 : 400, 
-          y: yPosition 
+        type: isUser ? "userNode" : "assistantNode",
+        position: {
+          x: isUser ? 50 : 400,
+          y: yPosition,
         },
         data: {
-          content: message.content.length > 150 
-            ? message.content.substring(0, 150) + '...' 
-            : message.content,
+          content:
+            message.content.length > 150
+              ? message.content.substring(0, 150) + "..."
+              : message.content,
           timestamp: message.timestamp.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
+            hour: "2-digit",
+            minute: "2-digit",
           }),
         },
       });
-      
+
       // Create edge to next message
       if (index < messages.length - 1) {
         flowEdges.push({
           id: `edge-${index}`,
           source: nodeId,
           target: `node-${messages[index + 1].id}`,
-          type: 'smoothstep',
+          type: "smoothstep",
           animated: true,
-          style: { stroke: '#8b5cf6', strokeWidth: 2 },
+          style: { stroke: "#8b5cf6", strokeWidth: 2 },
         });
       }
-      
+
       yPosition += nodeSpacing;
     });
-    
+
     // Add summary node if there are messages
     if (messages.length > 0) {
       const summaryContent = `Conversation with ${messages.length} messages. Topics discussed include data analysis and insights.`;
-      
+
       flowNodes.push({
-        id: 'summary-node',
-        type: 'summaryNode',
+        id: "summary-node",
+        type: "summaryNode",
         position: { x: 225, y: yPosition + 50 },
         data: {
           content: summaryContent,
         },
       });
-      
+
       // Connect last message to summary
       if (messages.length > 0) {
         flowEdges.push({
-          id: 'edge-to-summary',
+          id: "edge-to-summary",
           source: `node-${messages[messages.length - 1].id}`,
-          target: 'summary-node',
-          type: 'smoothstep',
+          target: "summary-node",
+          type: "smoothstep",
           animated: true,
-          style: { stroke: '#ec4899', strokeWidth: 2 },
+          style: { stroke: "#ec4899", strokeWidth: 2 },
         });
       }
     }
-    
+
     return { nodes: flowNodes, edges: flowEdges };
   }, [messages]);
 
@@ -180,7 +191,12 @@ export function ChatFlow({ messages, className }: ChatFlowProps) {
 
   if (messages.length === 0) {
     return (
-      <div className={cn("flex items-center justify-center h-64 text-muted-foreground", className)}>
+      <div
+        className={cn(
+          "flex items-center justify-center h-64 text-muted-foreground",
+          className
+        )}
+      >
         <div className="text-center">
           <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-50" />
           <p>No conversation to visualize</p>
@@ -190,7 +206,12 @@ export function ChatFlow({ messages, className }: ChatFlowProps) {
   }
 
   return (
-    <div className={cn("h-96 bg-background border rounded-lg overflow-hidden", className)}>
+    <div
+      className={cn(
+        "h-96 bg-background border rounded-lg overflow-hidden",
+        className
+      )}
+    >
       <ReactFlow
         nodes={flowNodes}
         edges={flowEdges}
@@ -210,7 +231,7 @@ export function ChatFlow({ messages, className }: ChatFlowProps) {
         className="bg-background"
       >
         <Background color="#aaa" gap={16} />
-        <Controls 
+        <Controls
           className="bg-card border border-border rounded-lg shadow-sm"
           showInteractive={false}
         />
