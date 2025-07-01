@@ -44,14 +44,31 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import Loader from "@/components/shared/loader";
+import { ModelSelectorDropdown } from "@/components/dashboard/chat/model-selector-dropdown";
+import { v4 as uuidv4 } from "uuid";
 
 interface Chat {
   id: string;
   title: string;
   messages: any[];
   createdAt: Date;
+}
+
+interface DatabaseResponse {
+  response: string;
+  history: Array<{
+    role: "user" | "ai";
+    content: string;
+  }>;
+  total_revenue?: number;
+  top_customers?: Array<{
+    customer_name: string;
+    total: number;
+  }>;
 }
 
 export const DashboardNavbar = () => {
@@ -71,6 +88,19 @@ export const DashboardNavbar = () => {
   const [dbError, setDbError] = useState("");
   const [dbTables, setDbTables] = useState<any[]>([]);
   const [selected, setSelected] = useState<{ [table: string]: string[] }>({});
+
+  // New state for AI model selection and message
+  const [selectedModel, setSelectedModel] = useState("gemini-1.5-flash");
+  const [selectedTools, setSelectedTools] = useState<string[]>([
+    "data-analysis",
+  ]);
+  const [selectedAgent, setSelectedAgent] = useState("agent-1");
+  const [userMessage, setUserMessage] = useState(
+    "Who are the top customers by total order value?"
+  );
+  const [isSendingToChat, setIsSendingToChat] = useState(false);
+  const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
+  const [loadingStep, setLoadingStep] = useState("");
 
   // Get chatId from URL parameters using native TypeScript
   useEffect(() => {
@@ -280,8 +310,11 @@ export const DashboardNavbar = () => {
       // For now, mock:
       setTimeout(() => {
         setDbTables([
+          {
+            name: "orders",
+            columns: ["id", "customer_name", "quantity", "price", "order_date"],
+          },
           { name: "users", columns: ["id", "name", "email"] },
-          { name: "orders", columns: ["id", "user_id", "amount"] },
         ]);
         setDbLoading(false);
       }, 1200);
@@ -303,13 +336,167 @@ export const DashboardNavbar = () => {
     });
   };
 
-  const handleSendToChat = () => {
-    // TODO: Send { dbUrl, selected } to chat as a query
-    setDbDialogOpen(false);
-    showToast.success(
-      "Query sent to chat!",
-      "Your selected tables/columns have been sent."
-    );
+  const handleSendToChat = async () => {
+    if (!dbUrl || Object.keys(selected).length === 0 || !userMessage.trim()) {
+      showToast.error(
+        "Missing information",
+        "Please fill in all required fields."
+      );
+      return;
+    }
+
+    setIsSendingToChat(true);
+    setShowLoadingOverlay(true);
+    setLoadingStep("Connecting to database...");
+
+    try {
+      // Prepare the payload
+      const payload = {
+        session_id: "chat-user-1",
+        connection_string: dbUrl,
+        selections: Object.entries(selected).map(([table, columns]) => ({
+          table,
+          columns,
+        })),
+        message: userMessage.trim(),
+        model: selectedModel,
+      };
+
+      // Simulate loading steps
+      setTimeout(() => {
+        setLoadingStep("Processing query...");
+      }, 800);
+
+      setTimeout(() => {
+        setLoadingStep("Analyzing data with AI...");
+      }, 2000);
+
+      setTimeout(() => {
+        setLoadingStep("Generating insights...");
+      }, 3500);
+
+      // Call the backend endpoint
+      const response = await fetch("/api/query-database", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: DatabaseResponse = await response.json();
+      console.log("Received API response:", data);
+
+      // Create a new chat with the response
+      const newChatId = uuidv4();
+      console.log("Generated new chat ID:", newChatId);
+
+      // First, create a chat with just the user message and loading state
+      const initialChat: Chat = {
+        id: newChatId,
+        title:
+          userMessage.length > 50
+            ? userMessage.substring(0, 50) + "..."
+            : userMessage,
+        messages: [
+          {
+            id: uuidv4(),
+            content: userMessage,
+            role: "user",
+            timestamp: new Date(),
+          },
+        ],
+        createdAt: new Date(),
+      };
+
+      // Save the initial chat to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`chat_${newChatId}`, JSON.stringify(initialChat));
+
+        // Dispatch event to notify about new chat creation
+        window.dispatchEvent(
+          new CustomEvent("chatStorageChanged", {
+            detail: {
+              chatId: newChatId,
+              action: "create",
+              newChat: initialChat,
+            },
+          })
+        );
+        console.log("Dispatched chatStorageChanged event for initial chat");
+      }
+
+      // Close the dialog and reset form
+      setDbDialogOpen(false);
+      setDbUrl("");
+      setSelected({});
+      setUserMessage("Who are the top customers by total order value?");
+
+      // Navigate to the new chat first
+      console.log("Navigating to new chat:", `/chat?id=${newChatId}`);
+      router.push(`/chat?id=${newChatId}`);
+
+      // Save the complete chat with AI response immediately
+      const finalChat: Chat = {
+        ...initialChat,
+        messages: [
+          ...initialChat.messages,
+          {
+            id: uuidv4(),
+            content: data.response,
+            role: "assistant",
+            timestamp: new Date(),
+            // Add structured data if available
+            ...(data.top_customers && {
+              structuredData: {
+                type: "top_customers",
+                data: data.top_customers,
+                totalRevenue: data.total_revenue,
+              },
+            }),
+          },
+        ],
+      };
+
+      // Save the final chat to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`chat_${newChatId}`, JSON.stringify(finalChat));
+        console.log("Saved final chat to localStorage:", finalChat);
+      }
+
+      // Close the dialog and reset form
+      setDbDialogOpen(false);
+      setDbUrl("");
+      setSelected({});
+      setUserMessage("Who are the top customers by total order value?");
+
+      setShowLoadingOverlay(false);
+      setLoadingStep("");
+
+      showToast.success(
+        "Chat created!",
+        "Your database query has been processed and a new chat has been created."
+      );
+
+      // Reload the page to show the new chat smoothly
+      setTimeout(() => {
+        window.location.href = `/chat?id=${newChatId}`;
+      }, 1000);
+    } catch (error) {
+      console.error("Error sending to chat:", error);
+      setShowLoadingOverlay(false);
+      setLoadingStep("");
+      showToast.error(
+        "Failed to process query",
+        "There was an error processing your database query. Please try again."
+      );
+    } finally {
+      setIsSendingToChat(false);
+    }
   };
 
   return (
@@ -413,56 +600,152 @@ export const DashboardNavbar = () => {
       </div>
 
       <Dialog open={dbDialogOpen} onOpenChange={setDbDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Connect to Neon DB</DialogTitle>
+            <DialogTitle>Connect to Database & Query</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <Input
-              placeholder="Enter Neon DB PostgreSQL URL..."
-              value={dbUrl}
-              onChange={(e) => setDbUrl(e.target.value)}
-              disabled={dbLoading}
-            />
-            <Button onClick={handleDbConnect} disabled={dbLoading || !dbUrl}>
-              {dbLoading ? <Loader /> : "Fetch Tables"}
-            </Button>
-            {dbError && <div className="text-red-500 text-sm">{dbError}</div>}
+          <div className="space-y-6">
+            {/* Database Connection */}
+            <div className="space-y-3">
+              <Label htmlFor="db-url">Database Connection String</Label>
+              <Input
+                id="db-url"
+                placeholder="Enter Neon DB PostgreSQL URL..."
+                value={dbUrl}
+                onChange={(e) => setDbUrl(e.target.value)}
+                disabled={dbLoading}
+              />
+              <Button
+                onClick={handleDbConnect}
+                disabled={dbLoading || !dbUrl}
+                className="w-full"
+              >
+                {dbLoading ? <Loader /> : "Fetch Tables"}
+              </Button>
+              {dbError && <div className="text-red-500 text-sm">{dbError}</div>}
+            </div>
+
+            {/* Table/Column Selection */}
             {dbTables.length > 0 && (
-              <div className="max-h-48 overflow-y-auto border rounded p-2">
-                {dbTables.map((table) => (
-                  <div key={table.name} className="mb-2">
-                    <div className="font-semibold mb-1">{table.name}</div>
-                    <div className="flex flex-wrap gap-2">
-                      {table.columns.map((col: string) => (
-                        <label key={col} className="flex items-center gap-1">
-                          <Checkbox
-                            checked={
-                              selected[table.name]?.includes(col) || false
-                            }
-                            onCheckedChange={() =>
-                              handleSelect(table.name, col)
-                            }
-                          />
-                          <span className="text-xs">{col}</span>
-                        </label>
-                      ))}
+              <div className="space-y-3">
+                <Label>Select Tables & Columns</Label>
+                <div className="max-h-48 overflow-y-auto border rounded p-3 bg-muted/20">
+                  {dbTables.map((table) => (
+                    <div key={table.name} className="mb-3 last:mb-0">
+                      <div className="font-semibold mb-2 text-sm">
+                        {table.name}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {table.columns.map((col: string) => (
+                          <label key={col} className="flex items-center gap-1">
+                            <Checkbox
+                              checked={
+                                selected[table.name]?.includes(col) || false
+                              }
+                              onCheckedChange={() =>
+                                handleSelect(table.name, col)
+                              }
+                            />
+                            <span className="text-xs">{col}</span>
+                          </label>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
+
+            {/* AI Model Selection */}
+            <div className="space-y-3">
+              <Label>AI Configuration</Label>
+              <ModelSelectorDropdown
+                selectedModel={selectedModel}
+                selectedTools={selectedTools}
+                selectedAgent={selectedAgent}
+                onModelSelect={setSelectedModel}
+                onToolToggle={(tool) =>
+                  setSelectedTools((prev) =>
+                    prev.includes(tool)
+                      ? prev.filter((t) => t !== tool)
+                      : [...prev, tool]
+                  )
+                }
+                onAgentSelect={setSelectedAgent}
+              />
+            </div>
+
+            {/* User Message */}
+            <div className="space-y-3">
+              <Label htmlFor="user-message">Your Question</Label>
+              <Textarea
+                id="user-message"
+                placeholder="What would you like to know about your data?"
+                value={userMessage}
+                onChange={(e) => setUserMessage(e.target.value)}
+                className="min-h-[80px]"
+              />
+            </div>
           </div>
           <DialogFooter>
             <Button
               onClick={handleSendToChat}
-              disabled={Object.keys(selected).length === 0 || !dbUrl}
+              disabled={
+                Object.keys(selected).length === 0 ||
+                !dbUrl ||
+                !userMessage.trim() ||
+                isSendingToChat
+              }
+              className="w-full"
             >
-              Send to Chat
+              {isSendingToChat ? (
+                <>
+                  <Loader />
+                  <span className="ml-2">Processing...</span>
+                </>
+              ) : (
+                "Send to Chat"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Loading Overlay */}
+      {showLoadingOverlay && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="bg-card border rounded-lg p-8 shadow-lg max-w-md w-full mx-4">
+            <div className="text-center space-y-4">
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <CheckCircle className="w-8 h-8 text-primary" />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold">Processing Your Query</h3>
+                <p className="text-muted-foreground text-sm">{loadingStep}</p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Connecting to database...</span>
+                  <span className="text-primary">✓</span>
+                </div>
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Analyzing data...</span>
+                  <span className="text-primary">✓</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span>Generating insights...</span>
+                  <span className="text-primary animate-pulse">●</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

@@ -78,7 +78,7 @@ function ToastContent({
 
   return (
     <div
-      className={`flex relative items-center border-2 ${config.borderColor} rounded-xl px-4 py-4 ${config.bgColor} w-[360px] overflow-hidden shadow-lg`}
+      className={`flex relative  z-50 items-center border-2 ${config.borderColor} rounded-xl px-4 py-4 ${config.bgColor} w-[360px] overflow-hidden shadow-lg`}
     >
       <div
         className={`flex items-center justify-center ${config.iconBgColor} rounded-full min-h-10 max-h-10 min-w-10 max-w-10 overflow-hidden shadow-sm`}

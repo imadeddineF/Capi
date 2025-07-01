@@ -37,6 +37,11 @@ interface Message {
   timestamp: Date;
   isEdited?: boolean;
   attachments?: FileAttachment[];
+  structuredData?: {
+    type: string;
+    data: any[];
+    totalRevenue?: number;
+  };
 }
 
 interface FileAttachment {
@@ -113,11 +118,14 @@ export default function ChatPageContent() {
 
   // Initialize or load chat
   useEffect(() => {
+    console.log("Chat ID changed:", chatId);
     if (chatId) {
       const existingChat = loadChatFromStorage(chatId);
+      console.log("Loaded existing chat:", existingChat);
       if (existingChat) {
         setCurrentChat(existingChat);
       } else {
+        console.log("No existing chat found, creating new empty chat");
         const newChat: Chat = {
           id: chatId,
           title: "New Chat",
@@ -129,6 +137,7 @@ export default function ChatPageContent() {
       }
     } else {
       // Always reset to a new chat state when no chatId
+      console.log("No chat ID, resetting to new chat state");
       setCurrentChat({
         id: "",
         title: "New Chat",
@@ -141,7 +150,13 @@ export default function ChatPageContent() {
   // Listen for chat storage changes to update content when switching chats
   useEffect(() => {
     const handleChatStorageChange = (event: CustomEvent) => {
-      if (
+      console.log("Chat storage change event:", event.detail);
+
+      if (event.detail.action === "create" && event.detail.chatId === chatId) {
+        // Handle new chat creation
+        console.log("Loading newly created chat:", event.detail.newChat);
+        setCurrentChat(event.detail.newChat);
+      } else if (
         event.detail.action === "navigate" &&
         event.detail.chatId === chatId
       ) {
@@ -616,13 +631,7 @@ export default function ChatPageContent() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-[9999] flex items-center justify-center"
-              style={{
-                background:
-                  "linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 50%, rgba(236, 72, 153, 0.1) 100%)",
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
-              }}
+              className="fixed inset-0 z-[9999] flex items-center justify-center bg-[linear-gradient(135deg,rgba(99,102,241,0.1)_0%,rgba(168,85,247,0.1)_50%,rgba(236,72,153,0.1)_100%)] backdrop-blur-[20px]"
             >
               {/* Animated Background Elements */}
               <div className="absolute inset-0 overflow-hidden">
@@ -680,13 +689,7 @@ export default function ChatPageContent() {
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.8, y: 20 }}
                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className="relative z-10 flex flex-col items-center gap-6 p-12 rounded-3xl shadow-2xl border border-white/20 backdrop-blur-xl"
-                style={{
-                  background:
-                    "linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%)",
-                  boxShadow:
-                    "0 25px 50px -12px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
-                }}
+                className="relative z-10 flex flex-col items-center gap-6 p-12 rounded-3xl shadow-2xl border border-white/20 backdrop-blur-xl bg-[linear-gradient(135deg,rgba(255,255,255,0.25)_0%,rgba(255,255,255,0.1)_100%)] [box-shadow:0_25px_50px_-12px_rgba(0,0,0,0.25),_inset_0_1px_0_rgba(255,255,255,0.2)]"
               >
                 {/* Animated Upload Icon */}
                 <motion.div
@@ -794,7 +797,7 @@ export default function ChatPageContent() {
         {/* Main Chat Content */}
         <motion.div
           animate={{
-            marginRight: isRightSidebarOpen ? "500px" : "0px",
+            x: isRightSidebarOpen ? -500 : 0,
           }}
           transition={{
             type: "spring",
@@ -1004,6 +1007,66 @@ export default function ChatPageContent() {
                                 >
                                   {msg.content}
                                 </p>
+
+                                {/* Structured Data Display */}
+                                {msg.structuredData &&
+                                  msg.structuredData.type ===
+                                    "top_customers" && (
+                                    <div className="mt-4 space-y-3">
+                                      {msg.structuredData.totalRevenue && (
+                                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-3">
+                                          <div className="text-sm font-medium text-blue-900">
+                                            Total Revenue: $
+                                            {msg.structuredData.totalRevenue.toFixed(
+                                              2
+                                            )}
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                        <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                                          <h4 className="font-medium text-gray-900">
+                                            Top Customers by Total Order Value
+                                          </h4>
+                                        </div>
+                                        <div className="overflow-x-auto">
+                                          <table className="w-full">
+                                            <thead className="bg-gray-50">
+                                              <tr>
+                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                  Customer Name
+                                                </th>
+                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                  Total Value
+                                                </th>
+                                              </tr>
+                                            </thead>
+                                            <tbody className="bg-white divide-y divide-gray-200">
+                                              {msg.structuredData.data.map(
+                                                (customer, index) => (
+                                                  <tr
+                                                    key={index}
+                                                    className="hover:bg-gray-50"
+                                                  >
+                                                    <td className="px-4 py-3 text-sm text-gray-900">
+                                                      {customer.customer_name}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                                      $
+                                                      {customer.total.toFixed(
+                                                        2
+                                                      )}
+                                                    </td>
+                                                  </tr>
+                                                )
+                                              )}
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
 
                                 {/* Attachments */}
                                 {msg.attachments &&
