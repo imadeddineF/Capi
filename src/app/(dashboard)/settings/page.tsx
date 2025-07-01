@@ -58,10 +58,10 @@ import {
   AlertTriangle,
   Check,
   X,
-  Settings,
   Palette,
   Database,
   Zap,
+  Settings2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { showToast } from "@/components/custom-ui/toast";
@@ -304,7 +304,7 @@ export default function Settings() {
                 Billing
               </TabsTrigger>
               <TabsTrigger value="advanced" className="gap-2">
-                <Settings className="w-4 h-4" />
+                <Settings2 className="w-4 h-4" />
                 Advanced
               </TabsTrigger>
             </TabsList>
