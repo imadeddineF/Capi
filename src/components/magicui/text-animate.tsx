@@ -111,13 +111,17 @@ const defaultItemAnimationVariants: Record<
         opacity: 1,
         y: 0,
         transition: {
-          duration: 0.3,
+          duration: 0.5,
+          ease: [0.25, 0.46, 0.45, 0.94],
         },
       },
       exit: {
         opacity: 0,
         y: 20,
-        transition: { duration: 0.3 },
+        transition: { 
+          duration: 0.4,
+          ease: [0.25, 0.46, 0.45, 0.94],
+        },
       },
     },
   },
@@ -129,13 +133,17 @@ const defaultItemAnimationVariants: Record<
         opacity: 1,
         filter: "blur(0px)",
         transition: {
-          duration: 0.3,
+          duration: 0.6,
+          ease: [0.25, 0.46, 0.45, 0.94],
         },
       },
       exit: {
         opacity: 0,
         filter: "blur(10px)",
-        transition: { duration: 0.3 },
+        transition: { 
+          duration: 0.5,
+          ease: [0.25, 0.46, 0.45, 0.94],
+        },
       },
     },
   },
@@ -148,9 +156,9 @@ const defaultItemAnimationVariants: Record<
         filter: "blur(0px)",
         y: 0,
         transition: {
-          y: { duration: 0.3 },
-          opacity: { duration: 0.4 },
-          filter: { duration: 0.3 },
+          y: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] },
+          opacity: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] },
+          filter: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] },
         },
       },
       exit: {
@@ -158,9 +166,9 @@ const defaultItemAnimationVariants: Record<
         filter: "blur(10px)",
         y: 20,
         transition: {
-          y: { duration: 0.3 },
-          opacity: { duration: 0.4 },
-          filter: { duration: 0.3 },
+          y: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+          opacity: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] },
+          filter: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
         },
       },
     },
@@ -174,9 +182,9 @@ const defaultItemAnimationVariants: Record<
         filter: "blur(0px)",
         y: 0,
         transition: {
-          y: { duration: 0.3 },
-          opacity: { duration: 0.4 },
-          filter: { duration: 0.3 },
+          y: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] },
+          opacity: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] },
+          filter: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] },
         },
       },
     },
@@ -189,14 +197,16 @@ const defaultItemAnimationVariants: Record<
         y: 0,
         opacity: 1,
         transition: {
-          duration: 0.3,
+          duration: 0.5,
+          ease: [0.25, 0.46, 0.45, 0.94],
         },
       },
       exit: {
         y: -20,
         opacity: 0,
         transition: {
-          duration: 0.3,
+          duration: 0.4,
+          ease: [0.25, 0.46, 0.45, 0.94],
         },
       },
     },
@@ -208,12 +218,18 @@ const defaultItemAnimationVariants: Record<
       show: {
         y: 0,
         opacity: 1,
-        transition: { duration: 0.3 },
+        transition: { 
+          duration: 0.5,
+          ease: [0.25, 0.46, 0.45, 0.94],
+        },
       },
       exit: {
         y: 20,
         opacity: 0,
-        transition: { duration: 0.3 },
+        transition: { 
+          duration: 0.4,
+          ease: [0.25, 0.46, 0.45, 0.94],
+        },
       },
     },
   },
@@ -224,12 +240,18 @@ const defaultItemAnimationVariants: Record<
       show: {
         x: 0,
         opacity: 1,
-        transition: { duration: 0.3 },
+        transition: { 
+          duration: 0.5,
+          ease: [0.25, 0.46, 0.45, 0.94],
+        },
       },
       exit: {
         x: -20,
         opacity: 0,
-        transition: { duration: 0.3 },
+        transition: { 
+          duration: 0.4,
+          ease: [0.25, 0.46, 0.45, 0.94],
+        },
       },
     },
   },
@@ -240,12 +262,18 @@ const defaultItemAnimationVariants: Record<
       show: {
         x: 0,
         opacity: 1,
-        transition: { duration: 0.3 },
+        transition: { 
+          duration: 0.5,
+          ease: [0.25, 0.46, 0.45, 0.94],
+        },
       },
       exit: {
         x: 20,
         opacity: 0,
-        transition: { duration: 0.3 },
+        transition: { 
+          duration: 0.4,
+          ease: [0.25, 0.46, 0.45, 0.94],
+        },
       },
     },
   },
@@ -257,18 +285,22 @@ const defaultItemAnimationVariants: Record<
         scale: 1,
         opacity: 1,
         transition: {
-          duration: 0.3,
+          duration: 0.5,
           scale: {
             type: "spring",
             damping: 15,
             stiffness: 300,
           },
+          ease: [0.25, 0.46, 0.45, 0.94],
         },
       },
       exit: {
         scale: 0.5,
         opacity: 0,
-        transition: { duration: 0.3 },
+        transition: { 
+          duration: 0.4,
+          ease: [0.25, 0.46, 0.45, 0.94],
+        },
       },
     },
   },
@@ -280,18 +312,22 @@ const defaultItemAnimationVariants: Record<
         scale: 1,
         opacity: 1,
         transition: {
-          duration: 0.3,
+          duration: 0.5,
           scale: {
             type: "spring",
             damping: 15,
             stiffness: 300,
           },
+          ease: [0.25, 0.46, 0.45, 0.94],
         },
       },
       exit: {
         scale: 1.5,
         opacity: 0,
-        transition: { duration: 0.3 },
+        transition: { 
+          duration: 0.4,
+          ease: [0.25, 0.46, 0.45, 0.94],
+        },
       },
     },
   },
@@ -300,15 +336,15 @@ const defaultItemAnimationVariants: Record<
 const TextAnimateBase = ({
   children,
   delay = 0,
-  duration = 0.3,
+  duration = 0.6,
   variants,
   className,
   segmentClassName,
-  as: Component = "p",
+  as: Component = "span",
   startOnView = true,
   once = false,
   by = "word",
-  animation = "fadeIn",
+  animation = "blurInUp",
   ...props
 }: TextAnimateProps) => {
   const MotionComponent = motion.create(Component);

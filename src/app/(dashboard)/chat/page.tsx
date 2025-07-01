@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Paperclip, ArrowUp, Bot, User, Copy, Edit, Check, X, Sparkles, Settings, Users, ChevronDown } from "lucide-react";
+import { Paperclip, ArrowUp, Bot, User, Copy, Edit, Check, X, Sparkles, Settings, Users, ChevronDown, Upload, FileText, X as XIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { v4 as uuidv4 } from "uuid";
 import { ModelSelectorDropdown } from "@/components/dashboard/chat/model-selector-dropdown";
@@ -16,6 +16,7 @@ import { TextAnimate } from "@/components/magicui/text-animate";
 import { useRightSidebar } from "@/components/dashboard/chat/right-sidebar-context";
 import { RightSidebar } from "@/components/dashboard/chat/right-sidebar";
 import { Badge } from "@/components/ui/badge";
+import { showToast } from "@/components/custom-ui/toast";
 
 interface Message {
   id: string;
@@ -23,6 +24,15 @@ interface Message {
   role: "user" | "assistant";
   timestamp: Date;
   isEdited?: boolean;
+  attachments?: FileAttachment[];
+}
+
+interface FileAttachment {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  url?: string;
 }
 
 interface Chat {
@@ -44,6 +54,8 @@ export default function ChatPageContent() {
     "data-analysis",
   ]);
   const [selectedAgent, setSelectedAgent] = useState("agent-1");
+  const [attachments, setAttachments] = useState<FileAttachment[]>([]);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   // Display options state
   const [showTimestamps, setShowTimestamps] = useState(true);
@@ -65,6 +77,8 @@ export default function ChatPageContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const editTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
 
   // Initialize chatId from URL parameters
   useEffect(() => {
@@ -171,7 +185,7 @@ export default function ChatPageContent() {
     }
   }, [editingMessageId]);
 
-  // Cycling text animation effect with smooth transitions
+  // Cycling text animation effect with super smooth transitions
   const animatedWords = [
     "to uncover today?",
     "to explore next?",
@@ -185,17 +199,57 @@ export default function ChatPageContent() {
     const interval = setInterval(() => {
       setIsAnimating(true);
       
-      // Small delay to allow exit animation
+      // Smooth delay for exit animation
       setTimeout(() => {
         setCurrentWordIndex(
           (prevIndex) => (prevIndex + 1) % animatedWords.length
         );
         setIsAnimating(false);
-      }, 300);
-    }, 3000);
+      }, 500);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, [animatedWords.length]);
+
+  // Drag and drop handlers
+  useEffect(() => {
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      setIsDragOver(true);
+    };
+
+    const handleDragLeave = (e: DragEvent) => {
+      e.preventDefault();
+      if (!dropZoneRef.current?.contains(e.relatedTarget as Node)) {
+        setIsDragOver(false);
+      }
+    };
+
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault();
+      setIsDragOver(false);
+      
+      const files = e.dataTransfer?.files;
+      if (files) {
+        handleFileSelect(files);
+      }
+    };
+
+    const dropZone = dropZoneRef.current;
+    if (dropZone) {
+      dropZone.addEventListener('dragover', handleDragOver);
+      dropZone.addEventListener('dragleave', handleDragLeave);
+      dropZone.addEventListener('drop', handleDrop);
+    }
+
+    return () => {
+      if (dropZone) {
+        dropZone.removeEventListener('dragover', handleDragOver);
+        dropZone.removeEventListener('dragleave', handleDragLeave);
+        dropZone.removeEventListener('drop', handleDrop);
+      }
+    };
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -228,8 +282,44 @@ export default function ChatPageContent() {
     );
   };
 
+  // File handling functions
+  const handleFileSelect = (files: FileList) => {
+    const newAttachments: FileAttachment[] = [];
+    
+    Array.from(files).forEach((file) => {
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        showToast.error("File too large", `${file.name} exceeds 10MB limit`);
+        return;
+      }
+      
+      const attachment: FileAttachment = {
+        id: uuidv4(),
+        name: file.name,
+        size: file.size,
+        type: file.type,
+      };
+      
+      newAttachments.push(attachment);
+    });
+    
+    setAttachments(prev => [...prev, ...newAttachments]);
+    showToast.success("Files attached", `${newAttachments.length} file(s) ready to send`);
+  };
+
+  const removeAttachment = (id: string) => {
+    setAttachments(prev => prev.filter(att => att.id !== id));
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
   const handleSendMessage = async () => {
-    if (!message.trim() || !currentChat || isLoading) return;
+    if ((!message.trim() && attachments.length === 0) || !currentChat || isLoading) return;
 
     let chatToUpdate = currentChat;
     if (!currentChat.id) {
@@ -240,16 +330,17 @@ export default function ChatPageContent() {
         title:
           message.trim().length > 50
             ? message.trim().substring(0, 50) + "..."
-            : message.trim(),
+            : message.trim() || "File Upload",
       };
       setUrlParam("id", newChatId);
     }
 
     const userMessage: Message = {
       id: uuidv4(),
-      content: message.trim(),
+      content: message.trim() || "Uploaded files",
       role: "user",
       timestamp: new Date(),
+      attachments: attachments.length > 0 ? [...attachments] : undefined,
     };
 
     const updatedChat = {
@@ -263,13 +354,14 @@ export default function ChatPageContent() {
     }
 
     setMessage("");
+    setAttachments([]);
     setIsLoading(true);
 
     // Simulate AI response
     setTimeout(() => {
       const assistantMessage: Message = {
         id: uuidv4(),
-        content: generateMockResponse(userMessage.content),
+        content: generateMockResponse(userMessage.content, userMessage.attachments),
         role: "assistant",
         timestamp: new Date(),
       };
@@ -287,7 +379,12 @@ export default function ChatPageContent() {
     }, 1500);
   };
 
-  const generateMockResponse = (userInput: string): string => {
+  const generateMockResponse = (userInput: string, attachments?: FileAttachment[]): string => {
+    if (attachments && attachments.length > 0) {
+      const fileTypes = attachments.map(att => att.type).join(", ");
+      return `I can see you've uploaded ${attachments.length} file(s) (${fileTypes}). I'll analyze the data and provide insights. What specific analysis would you like me to perform on these files?`;
+    }
+    
     const responses = [
       "I can help you analyze your data. Could you please share more details about the dataset you're working with?",
       "Based on your query, I'll need to examine the data structure first. What type of analysis are you looking to perform?",
@@ -431,7 +528,24 @@ export default function ChatPageContent() {
 
   return (
     <Suspense fallback={<div>Loading chat...</div>}>
-      <div className="flex h-full bg-background relative">
+      <div 
+        ref={dropZoneRef}
+        className={cn(
+          "flex h-full bg-background relative transition-all duration-300",
+          isDragOver && "bg-blue-50 border-2 border-dashed border-blue-300"
+        )}
+      >
+        {/* Drag overlay */}
+        {isDragOver && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-blue-50/90 backdrop-blur-sm">
+            <div className="text-center">
+              <Upload className="w-16 h-16 mx-auto mb-4 text-blue-500" />
+              <p className="text-xl font-semibold text-blue-700">Drop files here to upload</p>
+              <p className="text-blue-600">CSV, Excel, PDF, and more supported</p>
+            </div>
+          </div>
+        )}
+
         {/* Main Chat Content */}
         <motion.div
           animate={{
@@ -451,7 +565,7 @@ export default function ChatPageContent() {
               <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto text-center p-6">
                 {/* Large Title */}
                 <div className="mb-12">
-                  <h1 className="text-5xl font-bold mb-2 text-black flex items-center gap-2 justify-center">
+                  <h1 className="text-5xl font-bold mb-2 text-black flex items-center gap-2 justify-center whitespace-nowrap">
                     What would you like{" "}
                     <span className="text-purple-600 inline-block min-w-[300px] text-left">
                       {!isAnimating && (
@@ -460,8 +574,8 @@ export default function ChatPageContent() {
                           animation="blurInUp" 
                           by="word" 
                           once={false}
-                          duration={0.5}
-                          className="inline"
+                          duration={0.8}
+                          className="inline whitespace-nowrap"
                         >
                           {animatedWords[currentWordIndex]}
                         </TextAnimate>
@@ -482,12 +596,44 @@ export default function ChatPageContent() {
                       className="min-h-[80px] max-h-[200px] pr-24 resize-none border-0 bg-transparent rounded-2xl focus-visible:ring-0 focus-visible:ring-offset-0 text-lg placeholder:text-gray-500"
                       disabled={isLoading}
                     />
+                    
+                    {/* Attachments */}
+                    {attachments.length > 0 && (
+                      <div className="px-4 pb-2 flex flex-wrap gap-2">
+                        {attachments.map((attachment) => (
+                          <div
+                            key={attachment.id}
+                            className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2 text-sm"
+                          >
+                            <FileText className="w-4 h-4 text-gray-600" />
+                            <span className="text-gray-700">{attachment.name}</span>
+                            <span className="text-gray-500">({formatFileSize(attachment.size)})</span>
+                            <button
+                              onClick={() => removeAttachment(attachment.id)}
+                              className="text-gray-400 hover:text-red-500 ml-1"
+                            >
+                              <XIcon className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
                     <div className="absolute bottom-4 right-4 flex items-center gap-2">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => e.target.files && handleFileSelect(e.target.files)}
+                        accept=".csv,.xlsx,.xls,.pdf,.txt,.json,.xml"
+                      />
                       <Button
                         variant="ghost"
                         size="icon"
                         className="h-10 w-10 hover:bg-gray-100 rounded-xl"
                         disabled={isLoading}
+                        onClick={() => fileInputRef.current?.click()}
                       >
                         <Paperclip className="w-5 h-5 text-gray-600" />
                       </Button>
@@ -495,7 +641,7 @@ export default function ChatPageContent() {
                         onClick={handleSendMessage}
                         size="icon"
                         className="h-10 w-10 bg-gray-200 hover:bg-gray-300 rounded-xl shadow-sm"
-                        disabled={!message.trim() || isLoading}
+                        disabled={(!message.trim() && attachments.length === 0) || isLoading}
                       >
                         <ArrowUp className="w-5 h-5 text-gray-700" />
                       </Button>
@@ -618,6 +764,29 @@ export default function ChatPageContent() {
                                 >
                                   {msg.content}
                                 </p>
+                                
+                                {/* Attachments */}
+                                {msg.attachments && msg.attachments.length > 0 && (
+                                  <div className="mt-3 space-y-2">
+                                    {msg.attachments.map((attachment) => (
+                                      <div
+                                        key={attachment.id}
+                                        className={cn(
+                                          "flex items-center gap-2 p-2 rounded-lg",
+                                          msg.role === "user"
+                                            ? "bg-white/20"
+                                            : "bg-muted/50"
+                                        )}
+                                      >
+                                        <FileText className="w-4 h-4" />
+                                        <span className="text-sm">{attachment.name}</span>
+                                        <span className="text-xs opacity-70">
+                                          ({formatFileSize(attachment.size)})
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           )}
@@ -785,12 +954,44 @@ export default function ChatPageContent() {
                       className="min-h-[60px] max-h-[200px] pr-24 resize-none border-0 bg-transparent rounded-2xl focus-visible:ring-0 focus-visible:ring-offset-0"
                       disabled={isLoading}
                     />
+                    
+                    {/* Attachments */}
+                    {attachments.length > 0 && (
+                      <div className="px-4 pb-2 flex flex-wrap gap-2">
+                        {attachments.map((attachment) => (
+                          <div
+                            key={attachment.id}
+                            className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2 text-sm"
+                          >
+                            <FileText className="w-4 h-4 text-muted-foreground" />
+                            <span>{attachment.name}</span>
+                            <span className="text-muted-foreground">({formatFileSize(attachment.size)})</span>
+                            <button
+                              onClick={() => removeAttachment(attachment.id)}
+                              className="text-muted-foreground hover:text-destructive ml-1"
+                            >
+                              <XIcon className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
                     <div className="absolute bottom-2 right-2 flex items-center gap-1">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => e.target.files && handleFileSelect(e.target.files)}
+                        accept=".csv,.xlsx,.xls,.pdf,.txt,.json,.xml"
+                      />
                       <Button
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 hover:bg-muted/50 rounded-xl"
                         disabled={isLoading}
+                        onClick={() => fileInputRef.current?.click()}
                       >
                         <Paperclip className="w-4 h-4" />
                       </Button>
@@ -798,7 +999,7 @@ export default function ChatPageContent() {
                         onClick={handleSendMessage}
                         size="icon"
                         className="h-8 w-8 bg-hiki hover:bg-hiki/90 rounded-xl shadow-sm"
-                        disabled={!message.trim() || isLoading}
+                        disabled={(!message.trim() && attachments.length === 0) || isLoading}
                       >
                         <ArrowUp className="w-4 h-4" />
                       </Button>

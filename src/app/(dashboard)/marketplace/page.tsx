@@ -31,13 +31,13 @@ import {
   Users,
   Calendar,
   ExternalLink,
-  ChevronRight,
   Sparkles,
   BarChart3,
   Database,
   Brain,
   Zap,
   Globe,
+  ShoppingCart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { showToast } from "@/components/custom-ui/toast";
@@ -122,45 +122,6 @@ const mockItems: MarketplaceItem[] = [
       "/placeholder.svg?height=300&width=400",
     ],
   },
-  {
-    id: "4",
-    name: "Data Cleaning Automation Tool",
-    description:
-      "Powerful tool for automated data cleaning, validation, and preprocessing with custom rules.",
-    category: "tool",
-    price: 79,
-    rating: 4.7,
-    downloads: 650,
-    author: "AutoData Labs",
-    authorAvatar: "/placeholder.svg?height=40&width=40",
-    tags: ["data-cleaning", "automation", "preprocessing", "validation"],
-    featured: false,
-    trending: false,
-    createdAt: new Date("2024-01-08"),
-    thumbnail: "/placeholder.svg?height=200&width=300",
-    previewImages: ["/placeholder.svg?height=300&width=400"],
-  },
-  {
-    id: "5",
-    name: "Social Media Sentiment Dataset",
-    description:
-      "Large-scale social media sentiment analysis dataset with labeled emotions and topics.",
-    category: "dataset",
-    price: 39,
-    rating: 4.5,
-    downloads: 1800,
-    author: "Social Analytics Co",
-    authorAvatar: "/placeholder.svg?height=40&width=40",
-    tags: ["sentiment", "social-media", "nlp", "emotions"],
-    featured: false,
-    trending: true,
-    createdAt: new Date("2024-01-05"),
-    thumbnail: "/placeholder.svg?height=200&width=300",
-    previewImages: [
-      "/placeholder.svg?height=300&width=400",
-      "/placeholder.svg?height=300&width=400",
-    ],
-  },
 ];
 
 const categories = [
@@ -172,27 +133,16 @@ const categories = [
 ];
 
 const categoryColors = {
-  dataset:
-    "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800",
-  model:
-    "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800",
-  template:
-    "bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800",
-  tool: "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-800",
+  dataset: "bg-imad/10 text-imad border-imad/20",
+  model: "bg-maria/10 text-maria border-maria/20",
+  template: "bg-hiki/10 text-hiki border-hiki/20",
+  tool: "bg-soyed/10 text-soyed border-soyed/20",
 };
-
-const tabs = [
-  { id: "browse", name: "Browse" },
-  { id: "featured", name: "Featured" },
-  { id: "trending", name: "Trending" },
-  { id: "my-purchases", name: "My Purchases" },
-];
 
 export default function Marketplace() {
   const [items, setItems] = useState<MarketplaceItem[]>(mockItems);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [activeTab, setActiveTab] = useState("browse");
   const [sortBy, setSortBy] = useState<
     "popular" | "newest" | "rating" | "price"
   >("popular");
@@ -212,13 +162,7 @@ export default function Marketplace() {
     const matchesCategory =
       selectedCategory === "all" || item.category === selectedCategory;
 
-    const matchesTab =
-      activeTab === "browse" ||
-      (activeTab === "featured" && item.featured) ||
-      (activeTab === "trending" && item.trending) ||
-      activeTab === "my-purchases";
-
-    return matchesSearch && matchesCategory && matchesTab;
+    return matchesSearch && matchesCategory;
   });
 
   const sortedItems = [...filteredItems].sort((a, b) => {
@@ -248,123 +192,14 @@ export default function Marketplace() {
     setIsPreviewOpen(true);
   };
 
-  const ItemCard = ({ item }: { item: MarketplaceItem }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3 }}
-      className="group"
-    >
-      <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer h-full border-0 shadow-sm hover:shadow-xl hover:-translate-y-1">
-        <div className="relative overflow-hidden">
-          <div className="aspect-video bg-muted rounded-t-lg overflow-hidden">
-            <img
-              src={item.thumbnail || "/placeholder.svg"}
-              alt={item.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-          <div className="absolute top-3 left-3 flex gap-2">
-            {item.featured && (
-              <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 shadow-lg">
-                <Sparkles className="w-3 h-3 mr-1" />
-                Featured
-              </Badge>
-            )}
-            {item.trending && (
-              <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white border-0 shadow-lg">
-                <TrendingUp className="w-3 h-3 mr-1" />
-                Trending
-              </Badge>
-            )}
-          </div>
-          <div className="absolute top-3 right-3">
-            <Badge
-              className={cn("text-xs border", categoryColors[item.category])}
-            >
-              {item.category}
-            </Badge>
-          </div>
-        </div>
-
-        <CardContent className="p-6">
-          <div className="flex items-start justify-between mb-3">
-            <h3 className="font-semibold text-lg line-clamp-2 flex-1 group-hover:text-primary transition-colors">
-              {item.name}
-            </h3>
-            <div className="text-right ml-3">
-              <p className="font-bold text-xl text-primary">${item.price}</p>
-            </div>
-          </div>
-
-          <p className="text-muted-foreground text-sm line-clamp-2 mb-4 leading-relaxed">
-            {item.description}
-          </p>
-
-          <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <span className="font-medium">{item.rating}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Download className="w-4 h-4" />
-              <span>{item.downloads.toLocaleString()}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Users className="w-4 h-4" />
-              <span className="truncate">{item.author}</span>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-1 mb-6">
-            {item.tags.slice(0, 3).map((tag) => (
-              <Badge
-                key={tag}
-                variant="secondary"
-                className="text-xs bg-muted/50"
-              >
-                {tag}
-              </Badge>
-            ))}
-            {item.tags.length > 3 && (
-              <Badge variant="secondary" className="text-xs bg-muted/50">
-                +{item.tags.length - 3}
-              </Badge>
-            )}
-          </div>
-
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 group-hover:border-primary/50 transition-colors"
-              onClick={() => handlePreview(item)}
-            >
-              <Eye className="w-4 h-4 mr-2" />
-              Preview
-            </Button>
-            <Button
-              size="sm"
-              className="flex-1 shadow-sm"
-              onClick={() => handlePurchase(item)}
-            >
-              Purchase
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+              <h1 className="text-3xl font-bold text-foreground">
                 Marketplace
               </h1>
               <p className="text-muted-foreground mt-1">
@@ -373,41 +208,10 @@ export default function Marketplace() {
               </p>
             </div>
 
-            <Button className="gap-2 shadow-sm hover:shadow-md transition-shadow">
+            <Button className="gap-2 bg-imad hover:bg-imad/90">
               <ExternalLink className="w-4 h-4" />
               Sell Your Work
             </Button>
-          </div>
-
-          {/* Vercel-style Tabs */}
-          <div className="mb-6">
-            <div className="flex space-x-1 bg-muted/30 p-1 rounded-lg w-fit">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    "relative cursor-pointer flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200",
-                    activeTab === tab.id
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {tab.name}
-                  {activeTab === tab.id && (
-                    <motion.div
-                      layoutId="activeMarketplaceTab"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
-                      transition={{
-                        type: "spring",
-                        damping: 30,
-                        stiffness: 300,
-                      }}
-                    />
-                  )}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Search and Filters */}
@@ -418,16 +222,13 @@ export default function Marketplace() {
                 placeholder="Search marketplace..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 border-0 bg-muted/50 focus:bg-background transition-colors"
+                className="pl-10"
               />
             </div>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="gap-2 bg-background border-0 shadow-sm"
-                >
+                <Button variant="outline" className="gap-2">
                   <Filter className="w-4 h-4" />
                   Sort by {sortBy}
                 </Button>
@@ -462,10 +263,10 @@ export default function Marketplace() {
                   size="sm"
                   onClick={() => setSelectedCategory(category.id)}
                   className={cn(
-                    "gap-2 whitespace-nowrap transition-all duration-200",
+                    "gap-2 whitespace-nowrap",
                     selectedCategory === category.id
-                      ? "shadow-sm"
-                      : "border-0 bg-muted/50 hover:bg-background hover:shadow-sm"
+                      ? "bg-imad hover:bg-imad/90"
+                      : ""
                   )}
                 >
                   <IconComponent className="w-4 h-4" />
@@ -478,41 +279,126 @@ export default function Marketplace() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto">
-        <div className="p-6">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              {sortedItems.length === 0 ? (
-                <div className="text-center py-16">
-                  <Search className="w-16 h-16 mx-auto text-muted-foreground mb-4 opacity-50" />
-                  <h3 className="text-xl font-medium mb-2">No items found</h3>
-                  <p className="text-muted-foreground">
-                    Try adjusting your search terms or filters
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {sortedItems.map((item, index) => (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
-                    >
-                      <ItemCard item={item} />
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </div>
+      <div className="p-6">
+        {sortedItems.length === 0 ? (
+          <div className="text-center py-16">
+            <Search className="w-16 h-16 mx-auto text-muted-foreground mb-4 opacity-50" />
+            <h3 className="text-xl font-medium mb-2">No items found</h3>
+            <p className="text-muted-foreground">
+              Try adjusting your search terms or filters
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {sortedItems.map((item, index) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                className="group"
+              >
+                <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer border-0 shadow-sm hover:-translate-y-1">
+                  <div className="relative overflow-hidden">
+                    <div className="aspect-video bg-muted rounded-t-lg overflow-hidden">
+                      <div className="w-full h-full bg-gradient-to-br from-imad/20 to-maria/20 flex items-center justify-center">
+                        <BarChart3 className="w-12 h-12 text-imad/50" />
+                      </div>
+                    </div>
+                    <div className="absolute top-3 left-3 flex gap-2">
+                      {item.featured && (
+                        <Badge className="bg-gradient-to-r from-imad to-maria text-white border-0 shadow-lg">
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          Featured
+                        </Badge>
+                      )}
+                      {item.trending && (
+                        <Badge className="bg-gradient-to-r from-maria to-hiki text-white border-0 shadow-lg">
+                          <TrendingUp className="w-3 h-3 mr-1" />
+                          Trending
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="absolute top-3 right-3">
+                      <Badge
+                        className={cn("text-xs border", categoryColors[item.category])}
+                      >
+                        {item.category}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-3">
+                      <h3 className="font-semibold text-lg line-clamp-2 flex-1">
+                        {item.name}
+                      </h3>
+                      <div className="text-right ml-3">
+                        <p className="font-bold text-xl text-imad">${item.price}</p>
+                      </div>
+                    </div>
+
+                    <p className="text-muted-foreground text-sm line-clamp-2 mb-4 leading-relaxed">
+                      {item.description}
+                    </p>
+
+                    <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 fill-maria text-maria" />
+                        <span className="font-medium">{item.rating}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Download className="w-4 h-4" />
+                        <span>{item.downloads.toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users className="w-4 h-4" />
+                        <span className="truncate">{item.author}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1 mb-6">
+                      {item.tags.slice(0, 3).map((tag) => (
+                        <Badge
+                          key={tag}
+                          variant="secondary"
+                          className="text-xs bg-muted/50"
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
+                      {item.tags.length > 3 && (
+                        <Badge variant="secondary" className="text-xs bg-muted/50">
+                          +{item.tags.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => handlePreview(item)}
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        Preview
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="flex-1 bg-imad hover:bg-imad/90"
+                        onClick={() => handlePurchase(item)}
+                      >
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        Purchase
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Preview Dialog */}
@@ -539,19 +425,8 @@ export default function Marketplace() {
 
               <div className="space-y-6">
                 {/* Preview Images */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {selectedItem.previewImages.map((image, index) => (
-                    <div
-                      key={index}
-                      className="aspect-video bg-muted rounded-lg overflow-hidden"
-                    >
-                      <img
-                        src={image || "/placeholder.svg"}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
+                <div className="aspect-video bg-gradient-to-br from-imad/20 to-maria/20 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="w-16 h-16 text-imad/50" />
                 </div>
 
                 {/* Description */}
@@ -566,7 +441,7 @@ export default function Marketplace() {
                 <div className="grid grid-cols-3 gap-6">
                   <div className="text-center p-4 bg-muted/30 rounded-lg">
                     <div className="flex items-center justify-center gap-2 mb-2">
-                      <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                      <Star className="w-5 h-5 fill-maria text-maria" />
                       <span className="font-bold text-lg">
                         {selectedItem.rating}
                       </span>
@@ -611,7 +486,7 @@ export default function Marketplace() {
               </div>
 
               <DialogFooter className="flex items-center justify-between w-full pt-6">
-                <div className="text-3xl font-bold text-primary">
+                <div className="text-3xl font-bold text-imad">
                   ${selectedItem.price}
                 </div>
                 <div className="flex gap-3">
@@ -621,8 +496,9 @@ export default function Marketplace() {
                   </Button>
                   <Button
                     onClick={() => handlePurchase(selectedItem)}
-                    className="gap-2 shadow-sm"
+                    className="gap-2 bg-imad hover:bg-imad/90"
                   >
+                    <ShoppingCart className="w-4 h-4" />
                     Purchase Now
                   </Button>
                 </div>
