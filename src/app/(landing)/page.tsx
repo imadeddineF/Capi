@@ -331,15 +331,19 @@ function Header() {
 
           {/* Auth Buttons */}
           <div className="hidden md:flex items-center space-x-3">
-            <Button
-              variant="ghost"
-              className="text-white border border-white/30 hover:bg-white/10 rounded-full px-6"
-            >
-              Log-in
-            </Button>
-            <Button className="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 text-white rounded-full px-6">
-              Sign-up
-            </Button>
+            <Link href={"/sign-in"}>
+              <Button
+                variant="ghost"
+                className="text-white border border-white/30 hover:bg-white/10 rounded-full px-6"
+              >
+                Log-in
+              </Button>
+            </Link>
+            <Link href={"/sign-up"}>
+              <Button className="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 text-white rounded-full px-6">
+                Sign-up
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -700,9 +704,11 @@ function CTASection() {
           smarter decisions
         </p>
         <div className="relative inline-block">
-          <Button className="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 text-white rounded-full px-12 py-4 text-xl font-bold shadow-2xl shadow-purple-500/30">
-            Get Started Now
-          </Button>
+          <Link href={"/chat"}>
+            <Button className="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 text-white rounded-full px-12 py-4 text-xl font-bold shadow-2xl shadow-purple-500/30">
+              Get Started Now
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
