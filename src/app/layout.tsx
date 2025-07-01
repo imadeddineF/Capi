@@ -20,6 +20,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Capi",
   description: "An AI assistant for your projects data.",
+  icons: {
+    icon: '/logo-icon.svg', 
+  },
 };
 
 export default function RootLayout({
