@@ -51,7 +51,7 @@ const data = {
       title: "My History",
       url: "#",
       icon: History,
-      isActive: false,
+      isActive: true,
       items: [] as HistoryItem[],
     },
     {

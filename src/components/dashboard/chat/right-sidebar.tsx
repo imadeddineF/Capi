@@ -26,6 +26,7 @@ import { getUrlParam } from "@/utils/url-params";
 import { ChatFlow } from "./analytics/chat-flow";
 import { ChatAnalytics } from "./analytics/chat-analytics";
 import { TranscriptView } from "./analytics/transcript-view";
+import dummyFlowData from "../chat/analytics/dummy-flow-data";
 
 interface Chat {
   id: string;
@@ -218,7 +219,8 @@ export function RightSidebar() {
                         </CardHeader>
                         <CardContent>
                           <ChatFlow
-                            messages={currentChat?.messages || []}
+                            // messages={currentChat?.messages || []}
+                            customFlowData={dummyFlowData}
                             className="h-80"
                           />
                         </CardContent>

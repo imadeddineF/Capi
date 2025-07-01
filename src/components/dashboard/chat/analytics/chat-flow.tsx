@@ -27,9 +27,15 @@ interface ChatMessage {
   timestamp: Date;
 }
 
+interface CustomFlowData {
+  nodes: Node[];
+  edges: Edge[];
+}
+
 interface ChatFlowProps {
-  messages: ChatMessage[];
+  messages?: ChatMessage[];
   className?: string;
+  customFlowData?: CustomFlowData;
 }
 
 // Custom User Node
@@ -105,8 +111,18 @@ const nodeTypes = {
   summaryNode: SummaryNode,
 };
 
-export function ChatFlow({ messages, className }: ChatFlowProps) {
+export function ChatFlow({
+  messages = [],
+  className,
+  customFlowData,
+}: ChatFlowProps) {
   const { nodes, edges } = useMemo(() => {
+    if (customFlowData) {
+      return {
+        nodes: customFlowData.nodes,
+        edges: customFlowData.edges,
+      };
+    }
     const flowNodes: Node[] = [];
     const flowEdges: Edge[] = [];
 
@@ -179,7 +195,7 @@ export function ChatFlow({ messages, className }: ChatFlowProps) {
     }
 
     return { nodes: flowNodes, edges: flowEdges };
-  }, [messages]);
+  }, [messages, customFlowData]);
 
   const [flowNodes, setNodes, onNodesChange] = useNodesState(nodes);
   const [flowEdges, setEdges, onEdgesChange] = useEdgesState(edges);

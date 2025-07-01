@@ -235,25 +235,27 @@ export function NavMain({
                               className="h-6 w-6 p-0 hover:bg-sidebar-accent-foreground/10 transition-colors opacity-0 group-hover:opacity-100"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <MoreVertical className="h-4 w-4" />
+                              <MoreVertical className="h-4 w-4 text-gray-500" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            {/* <DropdownMenuItem>
                               <Pin className="h-4 w-4 mr-2" />
                               Pin
-                            </DropdownMenuItem>
+                            </DropdownMenuItem> */}
                             <DropdownMenuItem
                               onClick={() => handleRename(historyItem.title)}
+                              className="cursor-pointer"
                             >
                               <Edit3 className="h-4 w-4 mr-2" />
                               Rename
                             </DropdownMenuItem>
                             <DropdownMenuItem
+                              variant="destructive"
                               onClick={() =>
                                 onDeleteHistoryItem?.(historyItem.title)
                               }
-                              className="text-destructive"
+                              className="cursor-pointer"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Delete

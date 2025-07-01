@@ -5,7 +5,23 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Paperclip, ArrowUp, Bot, User, Copy, Edit, Check, X, Sparkles, Settings, Users, ChevronDown, Upload, FileText, X as XIcon } from "lucide-react";
+import {
+  Paperclip,
+  ArrowUp,
+  Bot,
+  User,
+  Copy,
+  Edit,
+  Check,
+  X,
+  Sparkles,
+  Settings,
+  Users,
+  ChevronDown,
+  Upload,
+  FileText,
+  X as XIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { v4 as uuidv4 } from "uuid";
 import { ModelSelectorDropdown } from "@/components/dashboard/chat/model-selector-dropdown";
@@ -198,7 +214,7 @@ export default function ChatPageContent() {
   useEffect(() => {
     const interval = setInterval(() => {
       setIsAnimating(true);
-      
+
       // Smooth delay for exit animation
       setTimeout(() => {
         setCurrentWordIndex(
@@ -228,7 +244,7 @@ export default function ChatPageContent() {
     const handleDrop = (e: DragEvent) => {
       e.preventDefault();
       setIsDragOver(false);
-      
+
       const files = e.dataTransfer?.files;
       if (files) {
         handleFileSelect(files);
@@ -246,18 +262,18 @@ export default function ChatPageContent() {
 
     const dropZone = dropZoneRef.current;
     if (dropZone) {
-      dropZone.addEventListener('dragover', handleDragOver);
-      dropZone.addEventListener('dragleave', handleDragLeave);
-      dropZone.addEventListener('drop', handleDrop);
-      document.addEventListener('paste', handlePaste);
+      dropZone.addEventListener("dragover", handleDragOver);
+      dropZone.addEventListener("dragleave", handleDragLeave);
+      dropZone.addEventListener("drop", handleDrop);
+      document.addEventListener("paste", handlePaste);
     }
 
     return () => {
       if (dropZone) {
-        dropZone.removeEventListener('dragover', handleDragOver);
-        dropZone.removeEventListener('dragleave', handleDragLeave);
-        dropZone.removeEventListener('drop', handleDrop);
-        document.removeEventListener('paste', handlePaste);
+        dropZone.removeEventListener("dragover", handleDragOver);
+        dropZone.removeEventListener("dragleave", handleDragLeave);
+        dropZone.removeEventListener("drop", handleDrop);
+        document.removeEventListener("paste", handlePaste);
       }
     };
   }, []);
@@ -273,7 +289,8 @@ export default function ChatPageContent() {
     const demoMessages: Message[] = [
       {
         id: uuidv4(),
-        content: "I've uploaded a sales dataset with customer information. Can you help me analyze the trends and create visualizations?",
+        content:
+          "I've uploaded a sales dataset with customer information. Can you help me analyze the trends and create visualizations?",
         role: "user",
         timestamp: new Date(Date.now() - 300000), // 5 minutes ago
         attachments: [
@@ -281,35 +298,38 @@ export default function ChatPageContent() {
             id: uuidv4(),
             name: "sales_data_2024.csv",
             size: 2400000,
-            type: "text/csv"
-          }
-        ]
+            type: "text/csv",
+          },
+        ],
       },
       {
         id: uuidv4(),
-        content: "I'll analyze your sales dataset and create comprehensive visualizations. Let me examine the data structure first.\n\n**Data Overview:**\n- 15,847 sales records\n- 12 columns including customer demographics, product categories, and revenue\n- Date range: January 2024 - December 2024\n\n**Key Findings:**\n1. **Revenue Growth**: 23% increase compared to 2023\n2. **Top Product Category**: Electronics (34% of total sales)\n3. **Peak Sales Month**: November (Black Friday impact)\n4. **Customer Segments**: Premium customers drive 67% of revenue\n\n**Visualizations Created:**\n- Monthly revenue trend chart\n- Product category breakdown\n- Customer segmentation analysis\n- Geographic sales distribution\n\nWould you like me to dive deeper into any specific aspect of the analysis?",
+        content:
+          "I'll analyze your sales dataset and create comprehensive visualizations. Let me examine the data structure first.\n\n**Data Overview:**\n- 15,847 sales records\n- 12 columns including customer demographics, product categories, and revenue\n- Date range: January 2024 - December 2024\n\n**Key Findings:**\n1. **Revenue Growth**: 23% increase compared to 2023\n2. **Top Product Category**: Electronics (34% of total sales)\n3. **Peak Sales Month**: November (Black Friday impact)\n4. **Customer Segments**: Premium customers drive 67% of revenue\n\n**Visualizations Created:**\n- Monthly revenue trend chart\n- Product category breakdown\n- Customer segmentation analysis\n- Geographic sales distribution\n\nWould you like me to dive deeper into any specific aspect of the analysis?",
         role: "assistant",
         timestamp: new Date(Date.now() - 240000), // 4 minutes ago
       },
       {
         id: uuidv4(),
-        content: "This is excellent! Can you create a React Flow diagram showing the customer journey from acquisition to purchase?",
+        content:
+          "This is excellent! Can you create a React Flow diagram showing the customer journey from acquisition to purchase?",
         role: "user",
         timestamp: new Date(Date.now() - 180000), // 3 minutes ago
       },
       {
         id: uuidv4(),
-        content: "I've created an interactive React Flow diagram showing the customer journey! Here's what the flow reveals:\n\n**Customer Journey Stages:**\n\n🎯 **Acquisition** → 📱 **Awareness** → 🔍 **Consideration** → 🛒 **Purchase** → 💝 **Retention**\n\n**Key Insights from the Flow:**\n- 68% of customers discover us through social media\n- Average consideration time: 5.2 days\n- Mobile users have 34% higher conversion rates\n- Email campaigns drive 45% of repeat purchases\n\n**Optimization Opportunities:**\n1. **Reduce friction** in the consideration phase\n2. **Enhance mobile experience** for better conversions\n3. **Personalize email campaigns** for higher retention\n\nThe interactive diagram shows conversion rates at each stage and allows you to explore different customer paths. You can see this visualization in the right sidebar under the 'Flow' tab!",
+        content:
+          "I've created an interactive React Flow diagram showing the customer journey! Here's what the flow reveals:\n\n**Customer Journey Stages:**\n\n🎯 **Acquisition** → 📱 **Awareness** → 🔍 **Consideration** → 🛒 **Purchase** → 💝 **Retention**\n\n**Key Insights from the Flow:**\n- 68% of customers discover us through social media\n- Average consideration time: 5.2 days\n- Mobile users have 34% higher conversion rates\n- Email campaigns drive 45% of repeat purchases\n\n**Optimization Opportunities:**\n1. **Reduce friction** in the consideration phase\n2. **Enhance mobile experience** for better conversions\n3. **Personalize email campaigns** for higher retention\n\nThe interactive diagram shows conversion rates at each stage and allows you to explore different customer paths. You can see this visualization in the right sidebar under the 'Flow' tab!",
         role: "assistant",
         timestamp: new Date(Date.now() - 120000), // 2 minutes ago
-      }
+      },
     ];
 
     if (currentChat) {
       const updatedChat = {
         ...currentChat,
         messages: demoMessages,
-        title: "Sales Data Analysis & Customer Journey"
+        title: "Sales Data Analysis & Customer Journey",
       };
       setCurrentChat(updatedChat);
     }
@@ -349,41 +369,50 @@ export default function ChatPageContent() {
   // File handling functions
   const handleFileSelect = (files: FileList) => {
     const newAttachments: FileAttachment[] = [];
-    
+
     Array.from(files).forEach((file) => {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      if (file.size > 10 * 1024 * 1024) {
+        // 10MB limit
         showToast.error("File too large", `${file.name} exceeds 10MB limit`);
         return;
       }
-      
+
       const attachment: FileAttachment = {
         id: uuidv4(),
         name: file.name,
         size: file.size,
         type: file.type,
       };
-      
+
       newAttachments.push(attachment);
     });
-    
-    setAttachments(prev => [...prev, ...newAttachments]);
-    showToast.success("Files attached", `${newAttachments.length} file(s) ready to send`);
+
+    setAttachments((prev) => [...prev, ...newAttachments]);
+    showToast.success(
+      "Files attached",
+      `${newAttachments.length} file(s) ready to send`
+    );
   };
 
   const removeAttachment = (id: string) => {
-    setAttachments(prev => prev.filter(att => att.id !== id));
+    setAttachments((prev) => prev.filter((att) => att.id !== id));
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const handleSendMessage = async () => {
-    if ((!message.trim() && attachments.length === 0) || !currentChat || isLoading) return;
+    if (
+      (!message.trim() && attachments.length === 0) ||
+      !currentChat ||
+      isLoading
+    )
+      return;
 
     let chatToUpdate = currentChat;
     if (!currentChat.id) {
@@ -425,7 +454,10 @@ export default function ChatPageContent() {
     setTimeout(() => {
       const assistantMessage: Message = {
         id: uuidv4(),
-        content: generateMockResponse(userMessage.content, userMessage.attachments),
+        content: generateMockResponse(
+          userMessage.content,
+          userMessage.attachments
+        ),
         role: "assistant",
         timestamp: new Date(),
       };
@@ -443,12 +475,15 @@ export default function ChatPageContent() {
     }, 1500);
   };
 
-  const generateMockResponse = (userInput: string, attachments?: FileAttachment[]): string => {
+  const generateMockResponse = (
+    userInput: string,
+    attachments?: FileAttachment[]
+  ): string => {
     if (attachments && attachments.length > 0) {
-      const fileTypes = attachments.map(att => att.type).join(", ");
+      const fileTypes = attachments.map((att) => att.type).join(", ");
       return `I can see you've uploaded ${attachments.length} file(s) (${fileTypes}). I'll analyze the data and provide insights. What specific analysis would you like me to perform on these files?`;
     }
-    
+
     const responses = [
       "I can help you analyze your data. Could you please share more details about the dataset you're working with?",
       "Based on your query, I'll need to examine the data structure first. What type of analysis are you looking to perform?",
@@ -596,7 +631,7 @@ export default function ChatPageContent() {
 
   return (
     <Suspense fallback={<div>Loading chat...</div>}>
-      <div 
+      <div
         ref={dropZoneRef}
         className={cn(
           "flex h-full bg-background relative transition-all duration-300",
@@ -608,8 +643,12 @@ export default function ChatPageContent() {
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-blue-50/90 backdrop-blur-sm">
             <div className="text-center">
               <Upload className="w-16 h-16 mx-auto mb-4 text-blue-500" />
-              <p className="text-xl font-semibold text-blue-700">Drop files here to upload</p>
-              <p className="text-blue-600">CSV, Excel, PDF, and more supported</p>
+              <p className="text-xl font-semibold text-blue-700">
+                Drop files here to upload
+              </p>
+              <p className="text-blue-600">
+                CSV, Excel, PDF, and more supported
+              </p>
             </div>
           </div>
         )}
@@ -637,10 +676,10 @@ export default function ChatPageContent() {
                     What would you like{" "}
                     <span className="text-purple-600 inline-block min-w-[300px] text-left">
                       {!isAnimating && (
-                        <TextAnimate 
+                        <TextAnimate
                           key={currentWordIndex}
-                          animation="blurInUp" 
-                          by="word" 
+                          animation="blurInUp"
+                          by="word"
                           once={false}
                           duration={0.8}
                           className="inline whitespace-nowrap"
@@ -664,7 +703,7 @@ export default function ChatPageContent() {
                       className="min-h-[80px] max-h-[200px] pr-24 resize-none border-0 bg-transparent rounded-2xl focus-visible:ring-0 focus-visible:ring-offset-0 text-lg placeholder:text-gray-500"
                       disabled={isLoading}
                     />
-                    
+
                     {/* Attachments */}
                     {attachments.length > 0 && (
                       <div className="px-4 pb-2 flex flex-wrap gap-2">
@@ -674,8 +713,12 @@ export default function ChatPageContent() {
                             className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2 text-sm"
                           >
                             <FileText className="w-4 h-4 text-gray-600" />
-                            <span className="text-gray-700">{attachment.name}</span>
-                            <span className="text-gray-500">({formatFileSize(attachment.size)})</span>
+                            <span className="text-gray-700">
+                              {attachment.name}
+                            </span>
+                            <span className="text-gray-500">
+                              ({formatFileSize(attachment.size)})
+                            </span>
                             <button
                               onClick={() => removeAttachment(attachment.id)}
                               className="text-gray-400 hover:text-red-500 ml-1"
@@ -686,14 +729,16 @@ export default function ChatPageContent() {
                         ))}
                       </div>
                     )}
-                    
+
                     <div className="absolute bottom-4 right-4 flex items-center gap-2">
                       <input
                         ref={fileInputRef}
                         type="file"
                         multiple
                         className="hidden"
-                        onChange={(e) => e.target.files && handleFileSelect(e.target.files)}
+                        onChange={(e) =>
+                          e.target.files && handleFileSelect(e.target.files)
+                        }
                         accept=".csv,.xlsx,.xls,.pdf,.txt,.json,.xml"
                       />
                       <Button
@@ -709,7 +754,10 @@ export default function ChatPageContent() {
                         onClick={handleSendMessage}
                         size="icon"
                         className="h-10 w-10 bg-gray-200 hover:bg-gray-300 rounded-xl shadow-sm"
-                        disabled={(!message.trim() && attachments.length === 0) || isLoading}
+                        disabled={
+                          (!message.trim() && attachments.length === 0) ||
+                          isLoading
+                        }
                       >
                         <ArrowUp className="w-5 h-5 text-gray-700" />
                       </Button>
@@ -812,29 +860,32 @@ export default function ChatPageContent() {
                                 >
                                   {msg.content}
                                 </p>
-                                
+
                                 {/* Attachments */}
-                                {msg.attachments && msg.attachments.length > 0 && (
-                                  <div className="mt-3 space-y-2">
-                                    {msg.attachments.map((attachment) => (
-                                      <div
-                                        key={attachment.id}
-                                        className={cn(
-                                          "flex items-center gap-2 p-2 rounded-lg",
-                                          msg.role === "user"
-                                            ? "bg-white/20"
-                                            : "bg-muted/50"
-                                        )}
-                                      >
-                                        <FileText className="w-4 h-4" />
-                                        <span className="text-sm">{attachment.name}</span>
-                                        <span className="text-xs opacity-70">
-                                          ({formatFileSize(attachment.size)})
-                                        </span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
+                                {msg.attachments &&
+                                  msg.attachments.length > 0 && (
+                                    <div className="mt-3 space-y-2">
+                                      {msg.attachments.map((attachment) => (
+                                        <div
+                                          key={attachment.id}
+                                          className={cn(
+                                            "flex items-center gap-2 p-2 rounded-lg",
+                                            msg.role === "user"
+                                              ? "bg-white/20"
+                                              : "bg-muted/50"
+                                          )}
+                                        >
+                                          <FileText className="w-4 h-4" />
+                                          <span className="text-sm">
+                                            {attachment.name}
+                                          </span>
+                                          <span className="text-xs opacity-70">
+                                            ({formatFileSize(attachment.size)})
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
                               </div>
                             </div>
                           )}
@@ -1002,7 +1053,7 @@ export default function ChatPageContent() {
                       className="min-h-[60px] max-h-[200px] pr-24 resize-none border-0 bg-transparent rounded-2xl focus-visible:ring-0 focus-visible:ring-offset-0"
                       disabled={isLoading}
                     />
-                    
+
                     {/* Attachments */}
                     {attachments.length > 0 && (
                       <div className="px-4 pb-2 flex flex-wrap gap-2">
@@ -1013,7 +1064,9 @@ export default function ChatPageContent() {
                           >
                             <FileText className="w-4 h-4 text-muted-foreground" />
                             <span>{attachment.name}</span>
-                            <span className="text-muted-foreground">({formatFileSize(attachment.size)})</span>
+                            <span className="text-muted-foreground">
+                              ({formatFileSize(attachment.size)})
+                            </span>
                             <button
                               onClick={() => removeAttachment(attachment.id)}
                               className="text-muted-foreground hover:text-destructive ml-1"
@@ -1024,14 +1077,16 @@ export default function ChatPageContent() {
                         ))}
                       </div>
                     )}
-                    
+
                     <div className="absolute bottom-2 right-2 flex items-center gap-1">
                       <input
                         ref={fileInputRef}
                         type="file"
                         multiple
                         className="hidden"
-                        onChange={(e) => e.target.files && handleFileSelect(e.target.files)}
+                        onChange={(e) =>
+                          e.target.files && handleFileSelect(e.target.files)
+                        }
                         accept=".csv,.xlsx,.xls,.pdf,.txt,.json,.xml"
                       />
                       <Button
@@ -1047,7 +1102,10 @@ export default function ChatPageContent() {
                         onClick={handleSendMessage}
                         size="icon"
                         className="h-8 w-8 bg-hiki hover:bg-hiki/90 rounded-xl shadow-sm"
-                        disabled={(!message.trim() && attachments.length === 0) || isLoading}
+                        disabled={
+                          (!message.trim() && attachments.length === 0) ||
+                          isLoading
+                        }
                       >
                         <ArrowUp className="w-4 h-4" />
                       </Button>
