@@ -1,30 +1,16 @@
 "use client";
 
-import { ChevronsUpDown, LogOut } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
+import { Settings, LogOut } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useLogout } from "@/hooks/use-auth";
 import { useAuth } from "@/providers/auth-provider";
 import { toast } from "sonner";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export function NavUser() {
-  const { isMobile, open } = useSidebar();
   const { user } = useAuth();
   const logoutMutation = useLogout();
-
+  const { open } = useSidebar();
   const fullName = user?.name || "User";
   const initials =
     fullName
@@ -46,63 +32,55 @@ export function NavUser() {
     });
   };
 
-  return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="border bg-card mb-1 h-14 cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <Avatar className="h-8 w-8 rounded-lg border">
-                <AvatarFallback className="rounded-lg">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              {open && (
-                <>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{fullName}</span>
-                    <span className="truncate text-xs">{user?.email}</span>
-                  </div>
-                  <ChevronsUpDown className="ml-auto size-4" />
-                </>
-              )}
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
+  if (!open) {
+    // Collapsed: show only avatar, centered, with tooltip
+    return (
+      <div className="flex justify-center py-4 border-t border-border">
+        <div className="group relative">
+          <Avatar className="w-10 h-10">
+            <AvatarFallback className="w-10 h-10 text-lg bg-muted text-muted-foreground border border-border">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          {/* <div className="absolute left-1/2 z-10 hidden group-hover:flex -translate-x-1/2 mt-2 px-3 py-2 rounded-lg bg-popover text-popover-foreground text-xs shadow-lg whitespace-nowrap">
+            <div className="font-semibold">{fullName}</div>
+            <div className="text-muted-foreground">{user?.email}</div>
+          </div> */}
+        </div>
+      </div>
+    );
+  }
 
-          <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
-            align="end"
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarFallback className="rounded-lg">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{fullName}</span>
-                  <span className="truncate text-xs">{user?.email}</span>
-                </div>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={handleLogout}
-              disabled={logoutMutation.isPending}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              {logoutMutation.isPending ? "Logging out..." : "Log out"}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
+  // Expanded: show full card
+  return (
+    <div className="w-full px-4 py-3 border-t pt-5">
+      {/* <div className="border-b pb-2 mb-3">
+        <div className="flex items-center gap-2 text-base font-semibold text-foreground">
+          <Settings className="w-4 h-4" />
+          Account & billing
+        </div>
+      </div> */}
+      <button
+        className="flex items-center gap-2 text-destructive font-medium mb-4 hover:underline"
+        onClick={handleLogout}
+        disabled={logoutMutation.isPending}
+      >
+        <LogOut className="w-5 h-5" />
+        {logoutMutation.isPending ? "Logging out..." : "Log out"}
+      </button>
+      <div className="flex border border-border rounded-lg items-center gap-2 mt-2 bg-card p-3">
+        <Avatar className="w-10 h-10">
+          <AvatarFallback className="w-10 h-10 text-3xl bg-muted text-muted-foreground border border-border">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col">
+          <span className="font-bold text-lg text-foreground">{fullName}</span>
+          <span className="text-xs text-muted-foreground">
+            {user?.email || "imad@gmail.com"}
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }

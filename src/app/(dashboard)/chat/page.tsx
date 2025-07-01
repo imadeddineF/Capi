@@ -1028,7 +1028,7 @@ export default function ChatPageContent() {
                     onToolToggle={handleToolToggle}
                     onAgentSelect={handleAgentSelect}
                   />
-                  <DisplayOptionsDropdown
+                  {/* <DisplayOptionsDropdown
                     showTimestamps={showTimestamps}
                     showAvatars={showAvatars}
                     compactMode={compactMode}
@@ -1039,7 +1039,7 @@ export default function ChatPageContent() {
                     onToggleCompactMode={handleToggleCompactMode}
                     onToggleDarkMode={handleToggleDarkMode}
                     onFontSizeChange={handleFontSizeChange}
-                  />
+                  /> */}
                 </div>
                 {/* Message Input */}
                 <div className="relative">

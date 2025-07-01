@@ -8,6 +8,7 @@ import {
   Plus,
   Settings,
   ShieldEllipsisIcon,
+  SidebarClose,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,10 +26,12 @@ import { NavMain } from "./nav-main";
 import logo from "../../../../public/logo.svg";
 import logoIcon from "../../../../public/logo-icon.svg";
 import logoText from "../../../../public/logo-text.svg";
+import logoTextDark from "../../../../public/logo-text-dark.svg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { getUrlParam } from "@/utils/url-params";
+import { useTheme } from "next-themes";
 
 interface Chat {
   id: string;
@@ -123,6 +126,7 @@ const testAdmin = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { open, state } = useSidebar();
+  const { theme } = useTheme();
   const router = useRouter();
   const [historyData, setHistoryData] = React.useState<HistoryItem[]>([]);
   const [currentChatId, setCurrentChatId] = React.useState<string | null>(null);
@@ -275,7 +279,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       >
         <Link href="/chat" className="flex items-end -space-x-1">
           <Image src={logoIcon} alt="logo" className="h-8" />
-          {open && <Image src={logoText} alt="logo" className="h-7" />}
+          {open &&
+            (theme === "dark" ? (
+              <Image src={logoTextDark} alt="logo" className="h-7" />
+            ) : (
+              <Image src={logoText} alt="logo" className="h-7" />
+            ))}
         </Link>
       </SidebarHeader>
 
@@ -283,7 +292,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <div className={`${open ? "px-4" : "px-2"} mb-4`}>
           <Button
             onClick={handleNewChat}
-            className={`w-full gap-2 bg-white hover:bg-gray-50 text-gray-900 border ${
+            className={`w-full gap-2 bg-white hover:bg-gray-50 border ${
               !open ? "px-2" : ""
             }`}
             variant="outline"

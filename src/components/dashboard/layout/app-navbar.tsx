@@ -253,7 +253,7 @@ export const DashboardNavbar = () => {
   const connectionStatus = getConnectionStatus();
 
   return (
-    <nav className="relative w-full z-30 border-b h-14 flex items-center justify-between gap-1 px-6 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-40 w-full border-b h-14 flex items-center justify-between gap-1 px-6 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex items-center gap-3">
         <SidebarTrigger className="hidden md:block" />
 
@@ -320,11 +320,11 @@ export const DashboardNavbar = () => {
             <DropdownMenuItem onClick={() => handleLanguageChange("R")}>
               R
             </DropdownMenuItem>
-            <DropdownMenuItem
+            {/* <DropdownMenuItem
               onClick={() => handleLanguageChange("JavaScript")}
             >
               JavaScript
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             <DropdownMenuItem onClick={() => handleLanguageChange("SQL")}>
               SQL
             </DropdownMenuItem>
