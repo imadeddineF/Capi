@@ -235,11 +235,21 @@ export default function ChatPageContent() {
       }
     };
 
+    // Add paste event listener for file uploads
+    const handlePaste = (e: ClipboardEvent) => {
+      const files = e.clipboardData?.files;
+      if (files && files.length > 0) {
+        e.preventDefault();
+        handleFileSelect(files);
+      }
+    };
+
     const dropZone = dropZoneRef.current;
     if (dropZone) {
       dropZone.addEventListener('dragover', handleDragOver);
       dropZone.addEventListener('dragleave', handleDragLeave);
       dropZone.addEventListener('drop', handleDrop);
+      document.addEventListener('paste', handlePaste);
     }
 
     return () => {
@@ -247,9 +257,63 @@ export default function ChatPageContent() {
         dropZone.removeEventListener('dragover', handleDragOver);
         dropZone.removeEventListener('dragleave', handleDragLeave);
         dropZone.removeEventListener('drop', handleDrop);
+        document.removeEventListener('paste', handlePaste);
       }
     };
   }, []);
+
+  // Auto-generate demo chat on first load
+  useEffect(() => {
+    if (currentChat && currentChat.messages.length === 0 && !chatId) {
+      generateDemoChat();
+    }
+  }, [currentChat, chatId]);
+
+  const generateDemoChat = () => {
+    const demoMessages: Message[] = [
+      {
+        id: uuidv4(),
+        content: "I've uploaded a sales dataset with customer information. Can you help me analyze the trends and create visualizations?",
+        role: "user",
+        timestamp: new Date(Date.now() - 300000), // 5 minutes ago
+        attachments: [
+          {
+            id: uuidv4(),
+            name: "sales_data_2024.csv",
+            size: 2400000,
+            type: "text/csv"
+          }
+        ]
+      },
+      {
+        id: uuidv4(),
+        content: "I'll analyze your sales dataset and create comprehensive visualizations. Let me examine the data structure first.\n\n**Data Overview:**\n- 15,847 sales records\n- 12 columns including customer demographics, product categories, and revenue\n- Date range: January 2024 - December 2024\n\n**Key Findings:**\n1. **Revenue Growth**: 23% increase compared to 2023\n2. **Top Product Category**: Electronics (34% of total sales)\n3. **Peak Sales Month**: November (Black Friday impact)\n4. **Customer Segments**: Premium customers drive 67% of revenue\n\n**Visualizations Created:**\n- Monthly revenue trend chart\n- Product category breakdown\n- Customer segmentation analysis\n- Geographic sales distribution\n\nWould you like me to dive deeper into any specific aspect of the analysis?",
+        role: "assistant",
+        timestamp: new Date(Date.now() - 240000), // 4 minutes ago
+      },
+      {
+        id: uuidv4(),
+        content: "This is excellent! Can you create a React Flow diagram showing the customer journey from acquisition to purchase?",
+        role: "user",
+        timestamp: new Date(Date.now() - 180000), // 3 minutes ago
+      },
+      {
+        id: uuidv4(),
+        content: "I've created an interactive React Flow diagram showing the customer journey! Here's what the flow reveals:\n\n**Customer Journey Stages:**\n\n🎯 **Acquisition** → 📱 **Awareness** → 🔍 **Consideration** → 🛒 **Purchase** → 💝 **Retention**\n\n**Key Insights from the Flow:**\n- 68% of customers discover us through social media\n- Average consideration time: 5.2 days\n- Mobile users have 34% higher conversion rates\n- Email campaigns drive 45% of repeat purchases\n\n**Optimization Opportunities:**\n1. **Reduce friction** in the consideration phase\n2. **Enhance mobile experience** for better conversions\n3. **Personalize email campaigns** for higher retention\n\nThe interactive diagram shows conversion rates at each stage and allows you to explore different customer paths. You can see this visualization in the right sidebar under the 'Flow' tab!",
+        role: "assistant",
+        timestamp: new Date(Date.now() - 120000), // 2 minutes ago
+      }
+    ];
+
+    if (currentChat) {
+      const updatedChat = {
+        ...currentChat,
+        messages: demoMessages,
+        title: "Sales Data Analysis & Customer Journey"
+      };
+      setCurrentChat(updatedChat);
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -486,16 +550,20 @@ export default function ChatPageContent() {
 
   const handleModelSelect = (model: string) => {
     setSelectedModel(model);
+    showToast.success("Model updated", `Switched to ${model}`);
   };
 
   const handleToolToggle = (tool: string) => {
     setSelectedTools((prev) =>
       prev.includes(tool) ? prev.filter((t) => t !== tool) : [...prev, tool]
     );
+    const action = selectedTools.includes(tool) ? "removed" : "added";
+    showToast.success("Tools updated", `${tool} ${action}`);
   };
 
   const handleAgentSelect = (agent: string) => {
     setSelectedAgent(agent);
+    showToast.success("Agent updated", `Switched to ${agent}`);
   };
 
   const handleToggleTimestamps = () => setShowTimestamps(!showTimestamps);
@@ -650,34 +718,14 @@ export default function ChatPageContent() {
                 </div>
 
                 {/* Model/Tools/Agents Selection */}
-                <div className="flex items-center gap-4">
-                  <Badge
-                    variant="outline"
-                    className="gap-2 cursor-pointer hover:bg-purple-50 border-purple-200 px-4 py-2 text-purple-700"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    Model
-                    <ChevronDown className="w-3 h-3" />
-                  </Badge>
-                  
-                  <Badge
-                    variant="outline"
-                    className="gap-2 cursor-pointer hover:bg-blue-50 border-blue-200 px-4 py-2 text-blue-700"
-                  >
-                    <Settings className="w-4 h-4" />
-                    Tools
-                    <ChevronDown className="w-3 h-3" />
-                  </Badge>
-                  
-                  <Badge
-                    variant="outline"
-                    className="gap-2 cursor-pointer hover:bg-purple-50 border-purple-200 px-4 py-2 text-purple-700"
-                  >
-                    <Users className="w-4 h-4" />
-                    Agents
-                    <ChevronDown className="w-3 h-3" />
-                  </Badge>
-                </div>
+                <ModelSelectorDropdown
+                  selectedModel={selectedModel}
+                  selectedTools={selectedTools}
+                  selectedAgent={selectedAgent}
+                  onModelSelect={handleModelSelect}
+                  onToolToggle={handleToolToggle}
+                  onAgentSelect={handleAgentSelect}
+                />
               </div>
             ) : (
               <div className="max-w-4xl mx-auto p-6 space-y-8">

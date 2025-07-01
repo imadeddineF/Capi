@@ -7,6 +7,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -161,18 +163,6 @@ const AI_AGENTS = [
     description: "Specializes in charts and data visualization",
     avatar: "6",
   },
-  {
-    id: "agent-7",
-    name: "Quality Checker",
-    description: "Reviews and validates data quality",
-    avatar: "7",
-  },
-  {
-    id: "agent-8",
-    name: "Strategy Advisor",
-    description: "Provides strategic recommendations",
-    avatar: "8",
-  },
 ];
 
 export function ModelSelectorDropdown({
@@ -200,14 +190,16 @@ export function ModelSelectorDropdown({
         <DropdownMenuTrigger asChild>
           <Badge
             variant="outline"
-            className="gap-2 cursor-pointer hover:bg-gray-50 border-gray-200 px-3 py-1.5"
+            className="gap-2 cursor-pointer hover:bg-purple-50 border-purple-200 px-4 py-2 text-purple-700"
           >
-            <Sparkles className="w-3 h-3 text-imad" />
+            <Sparkles className="w-4 h-4" />
             {getModelName()}
             <ChevronDown className="w-3 h-3" />
           </Badge>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-80" align="start">
+          <DropdownMenuLabel>Select AI Model</DropdownMenuLabel>
+          <DropdownMenuSeparator />
           {AI_MODELS.map((model) => {
             const IconComponent = model.icon;
             const isSelected = selectedModel === model.id;
@@ -253,14 +245,16 @@ export function ModelSelectorDropdown({
         <DropdownMenuTrigger asChild>
           <Badge
             variant="outline"
-            className="gap-2 cursor-pointer hover:bg-gray-50 border-gray-200 px-3 py-1.5"
+            className="gap-2 cursor-pointer hover:bg-blue-50 border-blue-200 px-4 py-2 text-blue-700"
           >
-            <Settings className="w-3 h-3 text-maria" />
+            <Settings className="w-4 h-4" />
             Tools ({selectedTools.length})
             <ChevronDown className="w-3 h-3" />
           </Badge>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-80" align="start">
+          <DropdownMenuLabel>Select Tools</DropdownMenuLabel>
+          <DropdownMenuSeparator />
           {AI_TOOLS.map((tool) => {
             const IconComponent = tool.icon;
             const isSelected = selectedTools.includes(tool.id);
@@ -292,14 +286,16 @@ export function ModelSelectorDropdown({
         <DropdownMenuTrigger asChild>
           <Badge
             variant="outline"
-            className="gap-2 cursor-pointer hover:bg-gray-50 border-gray-200 px-3 py-1.5"
+            className="gap-2 cursor-pointer hover:bg-purple-50 border-purple-200 px-4 py-2 text-purple-700"
           >
-            <Users className="w-3 h-3 text-imad" />
+            <Users className="w-4 h-4" />
             {getAgentName()}
             <ChevronDown className="w-3 h-3" />
           </Badge>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-80" align="start">
+          <DropdownMenuLabel>Select Agent</DropdownMenuLabel>
+          <DropdownMenuSeparator />
           {AI_AGENTS.map((agent) => {
             const isSelected = selectedAgent === agent.id;
 
