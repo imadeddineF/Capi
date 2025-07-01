@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Paperclip, Send, Bot, User, Copy, Edit, Check, X } from "lucide-react";
+import { Paperclip, ArrowUp, Bot, User, Copy, Edit, Check, X, Sparkles, Settings, Users, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { v4 as uuidv4 } from "uuid";
 import { ModelSelectorDropdown } from "@/components/dashboard/chat/model-selector-dropdown";
@@ -15,6 +15,7 @@ import { getUrlParam, setUrlParam } from "@/utils/url-params";
 import { TextAnimate } from "@/components/magicui/text-animate";
 import { useRightSidebar } from "@/components/dashboard/chat/right-sidebar-context";
 import { RightSidebar } from "@/components/dashboard/chat/right-sidebar";
+import { Badge } from "@/components/ui/badge";
 
 interface Message {
   id: string;
@@ -407,21 +408,6 @@ export default function ChatPageContent() {
   const handleFontSizeChange = (size: "small" | "medium" | "large") =>
     setFontSize(size);
 
-  const predefinedPrompts = [
-    "Summarize my uploaded CSV file.",
-    "Show me trends in my sales data.",
-    "What are the top 5 products by revenue?",
-    "Find anomalies in this dataset.",
-    "Visualize customer churn over time.",
-  ];
-
-  const handlePromptClick = (prompt: string) => {
-    setMessage(prompt);
-    if (textareaRef.current) {
-      textareaRef.current.focus();
-    }
-  };
-
   if (!currentChat) {
     return (
       <div className="flex items-center justify-center h-full bg-white">
@@ -462,11 +448,12 @@ export default function ChatPageContent() {
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto bg-background">
             {isNewChat ? (
-              <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center p-6">
-                <div className="mb-8">
-                  <h2 className="text-3xl font-bold mb-2 text-hiki flex items-center gap-2 justify-center">
+              <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto text-center p-6">
+                {/* Large Title */}
+                <div className="mb-12">
+                  <h1 className="text-5xl font-bold mb-2 text-black flex items-center gap-2 justify-center">
                     What would you like{" "}
-                    <span className="text-maria inline-block min-w-[200px] text-left">
+                    <span className="text-purple-600 inline-block min-w-[300px] text-left">
                       {!isAnimating && (
                         <TextAnimate 
                           key={currentWordIndex}
@@ -480,61 +467,70 @@ export default function ChatPageContent() {
                         </TextAnimate>
                       )}
                     </span>
-                  </h2>
+                  </h1>
                 </div>
-                {/* Centered Input */}
-                <div className="w-full max-w-xl mx-auto mb-6">
-                  <div className="relative bg-card border border-border rounded-2xl shadow-sm">
+
+                {/* Large Input Field */}
+                <div className="w-full max-w-3xl mx-auto mb-8">
+                  <div className="relative bg-white border border-gray-200 rounded-2xl shadow-sm">
                     <Textarea
                       ref={textareaRef}
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       onKeyDown={handleKeyPress}
                       placeholder="Link your data and ask anything..."
-                      className="min-h-[60px] max-h-[200px] pr-24 resize-none border-0 bg-transparent rounded-2xl focus-visible:ring-0 focus-visible:ring-offset-0"
+                      className="min-h-[80px] max-h-[200px] pr-24 resize-none border-0 bg-transparent rounded-2xl focus-visible:ring-0 focus-visible:ring-offset-0 text-lg placeholder:text-gray-500"
                       disabled={isLoading}
                     />
-                    <div className="absolute bottom-2 right-2 flex items-center gap-1">
+                    <div className="absolute bottom-4 right-4 flex items-center gap-2">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 hover:bg-muted/50 rounded-xl"
+                        className="h-10 w-10 hover:bg-gray-100 rounded-xl"
                         disabled={isLoading}
                       >
-                        <Paperclip className="w-4 h-4" />
+                        <Paperclip className="w-5 h-5 text-gray-600" />
                       </Button>
                       <Button
                         onClick={handleSendMessage}
                         size="icon"
-                        className="h-8 w-8 bg-hiki hover:bg-hiki/90 rounded-xl shadow-sm"
+                        className="h-10 w-10 bg-gray-200 hover:bg-gray-300 rounded-xl shadow-sm"
                         disabled={!message.trim() || isLoading}
                       >
-                        <Send className="w-4 h-4" />
+                        <ArrowUp className="w-5 h-5 text-gray-700" />
                       </Button>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between mt-2 px-1">
-                    <div className="text-xs text-muted-foreground">
-                      Press Enter to send, Shift+Enter for new line
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {message.length}/4000
-                    </div>
-                  </div>
                 </div>
-                {/* Predefined Prompts */}
-                <div className="w-full max-w-2xl mx-auto">
-                  <div className="flex flex-wrap gap-3 justify-center">
-                    {predefinedPrompts.map((prompt, idx) => (
-                      <button
-                        key={idx}
-                        className="w-32 h-32 rounded-xl border border-border bg-card p-3 text-center text-xs hover:bg-muted transition flex items-center justify-center"
-                        onClick={() => handlePromptClick(prompt)}
-                      >
-                        {prompt}
-                      </button>
-                    ))}
-                  </div>
+
+                {/* Model/Tools/Agents Selection */}
+                <div className="flex items-center gap-4">
+                  <Badge
+                    variant="outline"
+                    className="gap-2 cursor-pointer hover:bg-purple-50 border-purple-200 px-4 py-2 text-purple-700"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Model
+                    <ChevronDown className="w-3 h-3" />
+                  </Badge>
+                  
+                  <Badge
+                    variant="outline"
+                    className="gap-2 cursor-pointer hover:bg-blue-50 border-blue-200 px-4 py-2 text-blue-700"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Tools
+                    <ChevronDown className="w-3 h-3" />
+                  </Badge>
+                  
+                  <Badge
+                    variant="outline"
+                    className="gap-2 cursor-pointer hover:bg-purple-50 border-purple-200 px-4 py-2 text-purple-700"
+                  >
+                    <Users className="w-4 h-4" />
+                    Agents
+                    <ChevronDown className="w-3 h-3" />
+                  </Badge>
                 </div>
               </div>
             ) : (
@@ -804,7 +800,7 @@ export default function ChatPageContent() {
                         className="h-8 w-8 bg-hiki hover:bg-hiki/90 rounded-xl shadow-sm"
                         disabled={!message.trim() || isLoading}
                       >
-                        <Send className="w-4 h-4" />
+                        <ArrowUp className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
