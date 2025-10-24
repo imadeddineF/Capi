@@ -201,11 +201,11 @@ export function NavMain({
                     return (
                       <div
                         key={historyItem.title}
-                        className={`group flex items-center justify-between rounded-md px-2 py-1 transition-colors cursor-pointer
+                        className={`group flex items-center justify-between rounded-lg px-2.5 py-2 transition-all duration-200 cursor-pointer
                                                         ${
                                                           isActive
-                                                            ? "bg-[var(--imad)] text-white"
-                                                            : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                                                            ? "bg-primary text-primary-foreground shadow-sm"
+                                                            : "hover:bg-accent hover:text-accent-foreground"
                                                         }
                                                     `}
                         onClick={() => {
@@ -222,8 +222,8 @@ export function NavMain({
                         }}
                       >
                         <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <MessageSquare className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                          <span className="text-sm truncate">
+                          <MessageSquare className={`h-3.5 w-3.5 flex-shrink-0 ${isActive ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                          <span className="text-sm truncate font-medium">
                             {historyItem.title}
                           </span>
                         </div>
@@ -232,10 +232,10 @@ export function NavMain({
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-6 w-6 p-0 hover:bg-sidebar-accent-foreground/10 transition-colors opacity-0 group-hover:opacity-100"
+                              className="h-6 w-6 p-0 hover:bg-accent transition-colors opacity-0 group-hover:opacity-100"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <MoreVertical className="h-4 w-4 text-gray-500" />
+                              <MoreVertical className="h-3.5 w-3.5 text-muted-foreground" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
@@ -375,7 +375,7 @@ export function NavMain({
 
   return (
     <SidebarGroup>
-      {open && <SidebarGroupLabel>Workspace</SidebarGroupLabel>}
+      {open && <SidebarGroupLabel className="animate-in fade-in slide-in-from-left-1 duration-200">Workspace</SidebarGroupLabel>}
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible
@@ -389,17 +389,17 @@ export function NavMain({
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton
                   tooltip={item.title}
-                  className={`w-full justify-between ${
+                  className={`w-full justify-between transition-all duration-200 ${
                     item.isActive || isItemActive(item.url)
-                      ? "bg-imad text-white"
+                      ? "bg-imad text-white hover:bg-imad/90"
                       : ""
                   }`}
                   isActive={item.isActive || isItemActive(item.url)}
                 >
-                  <div className="flex items-center gap-2">
-                    {item.icon && <item.icon className="h-4 w-4" />}
+                  <div className="flex items-center gap-2 min-w-0">
+                    {item.icon && <item.icon className="h-4 w-4 flex-shrink-0" />}
                     {open && (
-                      <span>
+                      <span className="truncate animate-in fade-in slide-in-from-left-1 duration-200">
                         {item.title} (
                         {item.items?.length ||
                           item.workflows?.reduce(
@@ -412,7 +412,7 @@ export function NavMain({
                     )}
                   </div>
                   {open && (
-                    <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    <ChevronRight className="ml-auto h-4 w-4 flex-shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                   )}
                 </SidebarMenuButton>
               </CollapsibleTrigger>

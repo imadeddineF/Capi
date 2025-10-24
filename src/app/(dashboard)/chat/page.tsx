@@ -3,6 +3,7 @@
 import type React from "react";
 import { useState, useEffect, useRef, Suspense, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -61,6 +62,8 @@ interface Chat {
 
 export default function ChatPageContent() {
   const { isOpen: isRightSidebarOpen } = useRightSidebar();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [chatId, setChatId] = useState<string | null>(null);
   const [copy, isCopied] = useCopyToClipboard();
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
@@ -97,22 +100,23 @@ export default function ChatPageContent() {
   const editTextareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize chatId from URL parameters
+  // Initialize chatId from URL parameters and watch for changes
   useEffect(() => {
-    const id = getUrlParam("id");
+    const id = searchParams.get("id");
+    console.log("URL param changed, chatId:", id);
     setChatId(id);
-  }, []);
+  }, [searchParams]);
 
-  // Listen for URL changes (back/forward navigation)
+  // Listen for new chat requests from sidebar
   useEffect(() => {
-    const handlePopState = () => {
-      const id = getUrlParam("id");
-      setChatId(id);
+    const handleNewChatRequest = () => {
+      console.log("New chat requested");
+      setChatId(null);
     };
 
-    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("newChatRequested", handleNewChatRequest);
     return () => {
-      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("newChatRequested", handleNewChatRequest);
     };
   }, []);
 
@@ -641,7 +645,7 @@ export default function ChatPageContent() {
 
   if (!currentChat) {
     return (
-      <div className="flex items-center justify-center h-full bg-white">
+      <div className="flex items-center justify-center h-full bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
@@ -835,46 +839,37 @@ export default function ChatPageContent() {
         </AnimatePresence>
 
         {/* Main Chat Content */}
-        <motion.div
-          animate={{
-            x: isRightSidebarOpen ? -500 : 0,
-          }}
-          transition={{
-            type: "spring",
-            damping: 30,
-            stiffness: 300,
-            duration: 0.3,
-          }}
-          className="flex flex-col flex-1 h-full"
-        >
+        <div className="flex flex-col flex-1 h-full">
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto bg-background">
             {isNewChat ? (
               <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto text-center p-6">
                 {/* Large Title */}
                 <div className="mb-12">
-                  <h1 className="text-5xl font-bold mb-2 text-black flex items-center gap-2 justify-center whitespace-nowrap">
+                  <h1 className="text-5xl font-bold mb-2 text-foreground flex flex-nowrap items-center gap-2 justify-center whitespace-nowrap">
                     What would you like{" "}
-                    <span className="text-purple-600 inline-block min-w-[300px] text-left">
-                      {!isAnimating && (
-                        <TextAnimate
-                          key={currentWordIndex}
-                          animation="blurInUp"
-                          by="word"
-                          once={false}
-                          duration={0.8}
-                          className="inline whitespace-nowrap"
-                        >
-                          {animatedWords[currentWordIndex]}
-                        </TextAnimate>
-                      )}
+                    <span className="relative inline-block text-purple-600 whitespace-nowrap" style={{ width: "26rem", textAlign: "left" }}>
+                      <span className={`absolute left-0 top-0 transition-opacity duration-300 whitespace-nowrap ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
+                        {!isAnimating && (
+                          <TextAnimate
+                            key={currentWordIndex}
+                            animation="blurInUp"
+                            by="word"
+                            once={false}
+                            duration={0.8}
+                            className="inline whitespace-nowrap"
+                          >
+                            {animatedWords[currentWordIndex]}
+                          </TextAnimate>
+                        )}
+                      </span>
                     </span>
                   </h1>
                 </div>
 
                 {/* Large Input Field */}
                 <div className="w-full max-w-3xl mx-auto mb-8">
-                  <div className="relative bg-white border border-gray-200 rounded-2xl shadow-sm">
+                  <div className="relative bg-card border border-border rounded-2xl shadow-sm">
                     <Textarea
                       ref={textareaRef}
                       value={message}
@@ -931,22 +926,22 @@ export default function ChatPageContent() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-10 w-10 hover:bg-gray-100 rounded-xl"
+                        className="h-10 w-10 hover:bg-accent rounded-xl"
                         disabled={isLoading}
                         onClick={() => fileInputRef.current?.click()}
                       >
-                        <Paperclip className="w-5 h-5 text-gray-600" />
+                        <Paperclip className="w-5 h-5 text-muted-foreground" />
                       </Button>
                       <Button
                         onClick={handleSendMessage}
                         size="icon"
-                        className="h-10 w-10 bg-gray-200 hover:bg-gray-300 rounded-xl shadow-sm"
+                        className="h-10 w-10 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-sm"
                         disabled={
                           (!message.trim() && attachments.length === 0) ||
                           isLoading
                         }
                       >
-                        <ArrowUp className="w-5 h-5 text-gray-700" />
+                        <ArrowUp className="w-5 h-5" />
                       </Button>
                     </div>
                   </div>
@@ -1064,35 +1059,35 @@ export default function ChatPageContent() {
                                         </div>
                                       )}
 
-                                      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                                        <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
-                                          <h4 className="font-medium text-gray-900">
+                                      <div className="bg-card border border-border rounded-lg overflow-hidden">
+                                        <div className="bg-muted px-4 py-2 border-b border-border">
+                                          <h4 className="font-medium text-foreground">
                                             Top Customers by Total Order Value
                                           </h4>
                                         </div>
                                         <div className="overflow-x-auto">
                                           <table className="w-full">
-                                            <thead className="bg-gray-50">
+                                            <thead className="bg-muted">
                                               <tr>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                                                   Customer Name
                                                 </th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                                                   Total Value
                                                 </th>
                                               </tr>
                                             </thead>
-                                            <tbody className="bg-white divide-y divide-gray-200">
+                                            <tbody className="bg-card divide-y divide-border">
                                               {msg.structuredData.data.map(
                                                 (customer, index) => (
                                                   <tr
                                                     key={index}
-                                                    className="hover:bg-gray-50"
+                                                    className="hover:bg-accent"
                                                   >
-                                                    <td className="px-4 py-3 text-sm text-gray-900">
+                                                    <td className="px-4 py-3 text-sm text-foreground">
                                                       {customer.customer_name}
                                                     </td>
-                                                    <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                                    <td className="px-4 py-3 text-sm font-medium text-foreground">
                                                       $
                                                       {customer.total.toFixed(
                                                         2
@@ -1376,7 +1371,7 @@ export default function ChatPageContent() {
               </div>
             </div>
           )}
-        </motion.div>
+        </div>
 
         {/* Right Sidebar */}
         <RightSidebar />

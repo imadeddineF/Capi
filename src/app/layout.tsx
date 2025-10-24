@@ -9,51 +9,55 @@ import { Toaster } from "sonner";
 import PreloaderProvider from "@/providers/preloader-provider";
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+	variable: "--font-geist-sans",
+	subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+	variable: "--font-geist-mono",
+	subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Capi",
-  description: "An AI assistant for your projects data.",
-  icons: {
-    icon: "/logo-icon.svg",
-  },
+	title: "Capi",
+	description: "An AI assistant for your projects data.",
+	icons: {
+		icon: "/logo-icon.svg",
+	},
 };
 
 export default function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <PreloaderProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <ReactQueryProvider>
-              <AuthProvider>
-                <NetworkProvider>
-                  {children}
-                  <Toaster position="top-center" richColors closeButton />
-                </NetworkProvider>
-              </AuthProvider>
-            </ReactQueryProvider>
-          </ThemeProvider>
-        </PreloaderProvider>
-      </body>
-    </html>
-  );
+	return (
+		<html lang="en" suppressHydrationWarning>
+			<body
+				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+			>
+				<PreloaderProvider>
+					<ThemeProvider
+						attribute="class"
+						defaultTheme="system"
+						enableSystem
+						disableTransitionOnChange
+					>
+						<ReactQueryProvider>
+							<AuthProvider>
+								<NetworkProvider>
+									{children}
+									<Toaster
+										position="top-right"
+										richColors
+										closeButton
+									/>
+								</NetworkProvider>
+							</AuthProvider>
+						</ReactQueryProvider>
+					</ThemeProvider>
+				</PreloaderProvider>
+			</body>
+		</html>
+	);
 }
