@@ -1,7 +1,18 @@
 "use client";
 
+import * as React from "react";
 import { useState } from "react";
-import { ChevronDown, Menu, X } from "lucide-react";
+import {
+	ChevronDown,
+	Menu,
+	X,
+	Facebook,
+	Twitter,
+	Linkedin,
+	GithubIcon,
+	ArrowRight,
+	Sparkles,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -10,9 +21,9 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Switch } from "@/components/ui/switch";
 import Link from "next/link";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { Ripple } from "@/components/magicui/ripple";
 import { BentoCard, BentoGrid } from "@/components/magicui/bento-grid";
 import { VelocityScroll } from "@/components/magicui/scroll-based-velocity";
@@ -25,13 +36,17 @@ import AnimatedBeamMultipleOutputDemo from "@/components/landing/animated-beam-m
 import AnimatedListDemo from "@/components/landing/animated-list-demo";
 import bgImg from "../../../public/imgs/Frame 1707479299.png";
 import { ShimmerButton } from "@/components/magicui/shimmer-button";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
+import logoIcon from "../../../public/logo-icon.svg";
+import logoText from "../../../public/logo-text.svg";
+import logoTextDark from "../../../public/logo-text-dark.svg";
+import { useTheme } from "next-themes";
 
 // Navigation data
 const navItems = [
 	{ label: "Home", hasDropdown: false },
 	{ label: "Features", hasDropdown: true },
 	{ label: "How it works", hasDropdown: false },
-	{ label: "Pricing", hasDropdown: true },
 	{ label: "F&Q", hasDropdown: false },
 ];
 
@@ -193,88 +208,35 @@ const faqItems = [
 	},
 ];
 
-// Pricing plans
-const pricingPlans = [
-	{
-		name: "Free Trial",
-		description: "Perfect For Testing Our Platform",
-		price: "0",
-		color: "#55c1b3",
-		buttonText: "Get Started",
-		buttonStyle: "secondary" as const,
-		popular: false,
-		features: [
-			"Up to 3 team members",
-			"5 data source connections",
-			"100 AI analyses per month",
-			"Standard workflows",
-			"Basic multi-agent insights",
-		],
-	},
-	{
-		name: "Professional",
-		description: "Perfect For Growing Businesses",
-		price: "149",
-		color: "#a965f8",
-		buttonText: "Get Started",
-		buttonStyle: "primary" as const,
-		popular: true,
-		features: [
-			"Up to 15 team members",
-			"Unlimited data connections",
-			"Real-time analytics and insights",
-			"2,000 AI analyses per month",
-			"Advanced multi-agent reasoning",
-			"Custom workflow templates",
-			"24/7 chat support",
-			"All integrations included",
-			"Custom R script library",
-			"Advanced reporting",
-		],
-	},
-	{
-		name: "Enterprise",
-		description: "Perfect For Large Organizations With Specific Needs",
-		price: "Custom",
-		color: "#55c1b3",
-		buttonText: "Contact Sales",
-		buttonStyle: "secondary" as const,
-		popular: false,
-		features: [
-			"Unlimited team members",
-			"Unlimited everything",
-			"Custom AI agent training",
-			"On-premise deployment",
-			"Dedicated account manager",
-			"Custom integrations",
-			"SLA guarantees",
-			"Advanced security features",
-			"Custom training & onboarding",
-		],
-	},
-];
-
 // Social links
 const socialLinks = [
 	{
-		id: "email",
-		icon: "/placeholder.svg?height=20&width=20",
-		bgColor: "bg-gray-800",
-	},
-	{
-		id: "facebook",
-		icon: "/placeholder.svg?height=20&width=20",
-		bgColor: "bg-purple-500",
+		id: "github",
+		icon: GithubIcon,
+		href: "https://github.com",
+		label: "GitHub",
+		bgColor: "bg-gray-800 hover:bg-gray-700",
 	},
 	{
 		id: "twitter",
-		icon: "/placeholder.svg?height=20&width=20",
-		bgColor: "bg-gray-800",
+		icon: Twitter,
+		href: "https://twitter.com",
+		label: "Twitter",
+		bgColor: "bg-blue-500 hover:bg-blue-600",
 	},
 	{
 		id: "linkedin",
-		icon: "/placeholder.svg?height=20&width=20",
-		bgColor: "bg-gray-800",
+		icon: Linkedin,
+		href: "https://linkedin.com",
+		label: "LinkedIn",
+		bgColor: "bg-blue-700 hover:bg-blue-800",
+	},
+	{
+		id: "facebook",
+		icon: Facebook,
+		href: "https://facebook.com",
+		label: "Facebook",
+		bgColor: "bg-blue-600 hover:bg-blue-700",
 	},
 ];
 
@@ -283,151 +245,234 @@ const footerNavLinks = [
 	{ label: "Home", href: "#" },
 	{ label: "Features", href: "#" },
 	{ label: "How it works", href: "#" },
-	{ label: "Pricing", href: "#" },
 	{ label: "F&Q", href: "#" },
 ];
 
 // Header Component
-function Header() {
+export function Header() {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+	const { theme } = useTheme();
+	const [mounted, setMounted] = useState(false);
+
+	React.useEffect(() => {
+		setMounted(true);
+	}, []);
 
 	return (
-		<header className="relative w-full min-h-screen overflow-hidden bg-gradient-to-b from-[#090013] to-[#8f34fb] rounded-b-[2rem]">
+		<header className="relative w-full min-h-screen overflow-hidden bg-black">
+			<div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black opacity-90" />
+			<div className="absolute inset-0 bg-gradient-to-r from-violet-600/5 via-transparent to-violet-600/5" />
+
 			{/* Ripple Background */}
 			<div className="absolute inset-0">
 				<Ripple />
 			</div>
 
 			{/* Navigation */}
-			<nav className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8">
-				<div className="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-full px-6 py-3 border border-white/20">
+			<motion.nav
+				initial={{ opacity: 0, y: -20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.5 }}
+				className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6"
+			>
+				<div className="flex items-center justify-between bg-white/5 backdrop-blur-xl rounded-2xl px-8 py-4 border border-white/10 shadow-2xl shadow-black/20">
 					{/* Logo */}
-					<div className="flex items-center space-x-2">
-						<div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg flex items-center justify-center">
-							<span className="text-white font-bold text-lg">
-								C
-							</span>
-						</div>
-						<span className="text-white font-semibold text-lg">
-							Capi
-						</span>
-					</div>
+					<Link href="/" className="flex items-center gap-1 group">
+						<Image
+							src={logoIcon || "/placeholder.svg"}
+							alt="Logo"
+							className="h-9 w-9"
+						/>
+						{mounted && (
+							<Image
+								src={theme === "dark" ? logoTextDark : logoText}
+								alt="Capi"
+								className="h-6 transition-opacity duration-200"
+							/>
+						)}
+					</Link>
 
 					{/* Desktop Navigation */}
-					<div className="hidden md:flex items-center space-x-8">
+					<div className="hidden md:flex items-center space-x-1">
 						{navItems.map((item, index) => (
-							<div
+							<motion.div
 								key={index}
+								initial={{ opacity: 0, y: -10 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{
+									duration: 0.3,
+									delay: 0.1 + index * 0.05,
+								}}
 								className="flex items-center space-x-1"
 							>
 								<Link
 									href="#"
-									className="text-white/90 hover:text-white transition-colors text-sm font-medium"
+									className="text-white/80 hover:text-white transition-colors text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/5"
 								>
 									{item.label}
 								</Link>
 								{item.hasDropdown && (
-									<ChevronDown className="w-4 h-4 text-white/70" />
+									<ChevronDown className="w-4 h-4 text-white/50" />
 								)}
-							</div>
+							</motion.div>
 						))}
 					</div>
 
-					{/* Auth Buttons */}
+					{/* Auth Buttons & Theme Toggle */}
 					<div className="hidden md:flex items-center space-x-3">
+						<ThemeToggle />
 						<Link href={"/sign-in"}>
 							<Button
 								variant="ghost"
-								className="text-white border border-white/30 hover:bg-white/10 rounded-full px-6"
+								className="text-white/80 hover:text-white border border-white/20 hover:bg-white/10 rounded-lg px-6 transition-all duration-200"
 							>
 								Log-in
 							</Button>
 						</Link>
 						<Link href={"/sign-up"}>
-							<Button className="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 text-white rounded-full px-6">
+							<Button className="bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white rounded-lg px-6 shadow-lg shadow-violet-500/30 transition-all duration-200 hover:shadow-violet-500/50">
 								Sign-up
 							</Button>
 						</Link>
 					</div>
 
 					{/* Mobile Menu Button */}
-					<Button
-						variant="ghost"
-						size="icon"
-						className="md:hidden text-white"
-						onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-					>
-						{mobileMenuOpen ? (
-							<X className="w-6 h-6" />
-						) : (
-							<Menu className="w-6 h-6" />
-						)}
-					</Button>
+					<div className="flex items-center gap-3 md:hidden">
+						<ThemeToggle />
+						<Button
+							variant="ghost"
+							size="icon"
+							className="text-white"
+							onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+						>
+							{mobileMenuOpen ? (
+								<X className="w-6 h-6" />
+							) : (
+								<Menu className="w-6 h-6" />
+							)}
+						</Button>
+					</div>
 				</div>
 
 				{/* Mobile Menu */}
 				{mobileMenuOpen && (
-					<div className="md:hidden mt-4 bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+					<motion.div
+						initial={{ opacity: 0, y: -20 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0, y: -20 }}
+						className="md:hidden mt-4 bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10"
+					>
 						<div className="flex flex-col space-y-4">
 							{navItems.map((item, index) => (
 								<Link
 									key={index}
 									href="#"
-									className="text-white/90 hover:text-white transition-colors text-sm font-medium py-2"
+									className="text-white/80 hover:text-white transition-colors text-sm font-medium py-2"
 								>
 									{item.label}
 								</Link>
 							))}
-							<div className="flex flex-col space-y-2 pt-4 border-t border-white/20">
-								<Button
-									variant="ghost"
-									className="text-white border border-white/30 hover:bg-white/10 rounded-full"
-								>
-									Log-in
-								</Button>
-								<Button className="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 text-white rounded-full">
-									Sign-up
-								</Button>
+							<div className="flex flex-col space-y-2 pt-4 border-t border-white/10">
+								<Link href="/sign-in">
+									<Button
+										variant="ghost"
+										className="w-full text-white border border-white/20 hover:bg-white/10 rounded-lg"
+									>
+										Log-in
+									</Button>
+								</Link>
+								<Link href="/sign-up">
+									<Button className="w-full bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white rounded-lg">
+										Sign-up
+									</Button>
+								</Link>
 							</div>
 						</div>
-					</div>
+					</motion.div>
 				)}
-			</nav>
+			</motion.nav>
 
 			{/* Hero Section */}
-			<div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 pt-16 pb-20 text-center">
-				<h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+			<motion.div
+				initial={{ opacity: 0, y: 30 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.6, delay: 0.2 }}
+				className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-20 pb-24 text-center"
+			>
+				<motion.div
+					initial={{ opacity: 0, y: 10 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.6, delay: 0.3 }}
+					className="inline-flex items-center gap-2 bg-violet-500/10 border border-violet-500/30 rounded-full px-4 py-2 mb-8"
+				>
+					<Sparkles className="w-4 h-4 text-violet-400" />
+					<span className="text-sm font-medium text-violet-300">
+						AI-Powered Analytics Platform
+					</span>
+				</motion.div>
+
+				<motion.h1
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.6, delay: 0.35 }}
+					className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight tracking-tight"
+				>
 					Transform Data Into
 					<br />
-					Actionable Insights
-				</h1>
-				<p className="text-lg sm:text-xl text-white/80 mb-8 max-w-3xl mx-auto leading-relaxed">
+					<span className="bg-gradient-to-r from-violet-400 via-violet-300 to-violet-400 bg-clip-text text-transparent">
+						Actionable Insights
+					</span>
+				</motion.h1>
+				<motion.p
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.6, delay: 0.4 }}
+					className="text-lg sm:text-xl text-white/70 mb-10 max-w-3xl mx-auto leading-relaxed"
+				>
 					Empower your business with real-time AI insights. Turn your
 					data into action with generative AI, statistics, and smart
 					business reasoning.
-				</p>
+				</motion.p>
 
-				<Link href={"/chat"}>
-					<ShimmerButton className="!bg-gradient-to-r from-purple-600 to-purple-800 mx-auto">
-						Get Started Now
-						<ChevronDown className="w-5 h-5 ml-2 rotate-[-45deg]" />
-					</ShimmerButton>
-				</Link>
-			</div>
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.6, delay: 0.5 }}
+					className="flex flex-col sm:flex-row items-center justify-center gap-4"
+				>
+					<Link href={"/chat"}>
+						<ShimmerButton className="!bg-gradient-to-r from-violet-600 to-violet-700">
+							Get Started Now
+							<ArrowRight className="w-5 h-5 ml-2" />
+						</ShimmerButton>
+					</Link>
+					<Button
+						variant="outline"
+						className="border-white/20 text-white hover:bg-white/10 rounded-lg px-8 py-3 text-base font-medium bg-transparent"
+					>
+						Watch Demo
+					</Button>
+				</motion.div>
+			</motion.div>
 
 			{/* Hero Image */}
-			<div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pb-20">
-				<div className="relative rounded-xl overflow-hidden shadow-2xl">
+			<motion.div
+				initial={{ opacity: 0, y: 40 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.8, delay: 0.6 }}
+				className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pb-20"
+			>
+				<div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10">
 					<Image
-						src={bgImg}
+						src={bgImg || "/placeholder.svg"}
 						alt="Dashboard Preview"
 						width={1200}
 						height={600}
 						className="w-full h-auto"
 					/>
-					<div className="absolute inset-0 bg-gradient-to-t from-[#090013] via-transparent to-transparent" />
+					<div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
 				</div>
-			</div>
+			</motion.div>
 		</header>
 	);
 }
@@ -435,22 +480,29 @@ function Header() {
 // Features Section with Bento Grid
 function FeaturesSection() {
 	return (
-		<section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#090013] relative overflow-hidden">
-			{/* Background Effects */}
-			<div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-[#8f34fb] rounded-full blur-[150px] opacity-30" />
+		<section className="py-24 px-4 sm:px-6 lg:px-8 bg-black relative overflow-hidden">
+			<div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-violet-600 rounded-full blur-[200px] opacity-15" />
+			<div className="absolute bottom-1/4 left-0 w-[400px] h-[400px] bg-violet-600 rounded-full blur-[200px] opacity-10" />
 
-			<div className="mx-auto max-w-7xl">
-				<div className="text-center mb-16">
-					<h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4">
-						Powerful Features
-					</h2>
-					<p className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto">
-						Everything you need to turn your business data into
-						competitive advantage
-					</p>
+			<div className="mx-auto max-w-7xl relative z-10">
+				<div className="text-center mb-20">
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.6 }}
+						viewport={{ once: true }}
+					>
+						<h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+							Powerful Features
+						</h2>
+						<p className="text-lg sm:text-xl text-white/60 max-w-2xl mx-auto">
+							Everything you need to turn your business data into
+							competitive advantage
+						</p>
+					</motion.div>
 				</div>
 
-				<BentoGrid className="mx-auto max-w-4xl">
+				<BentoGrid className="mx-auto max-w-5xl">
 					{features.map((feature, idx) => (
 						<BentoCard key={idx} {...feature} />
 					))}
@@ -463,16 +515,16 @@ function FeaturesSection() {
 // Velocity Scroll Section
 function VelocityScrollSection() {
 	return (
-		<section className="py-16 bg-[#090013] relative overflow-hidden">
+		<section className="py-20 bg-black relative overflow-hidden border-y border-white/5">
 			<div className="relative">
 				<VelocityScroll
 					defaultVelocity={1}
-					className="font-display text-center text-4xl font-bold tracking-[-0.02em] text-white drop-shadow-sm md:text-7xl md:leading-[5rem]"
+					className="font-display text-center text-4xl font-bold tracking-[-0.02em] text-white drop-shadow-sm md:text-6xl md:leading-[5rem]"
 				>
 					Transform • Analyze • Optimize • Scale •
 				</VelocityScroll>
-				<div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-[#090013]"></div>
-				<div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-[#090013]"></div>
+				<div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-black"></div>
+				<div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-black"></div>
 			</div>
 		</section>
 	);
@@ -481,28 +533,41 @@ function VelocityScrollSection() {
 // How It Works Section
 function HowItWorksSection() {
 	return (
-		<section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#090013] relative overflow-hidden">
-			{/* Background Effects */}
-			<div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#8f34fb] rounded-full blur-[150px] opacity-30" />
+		<section className="py-24 px-4 sm:px-6 lg:px-8 bg-black relative overflow-hidden">
+			<div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-violet-600 rounded-full blur-[200px] opacity-10" />
 
-			<div className="mx-auto max-w-6xl">
-				<div className="text-center mb-16">
-					<h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4">
-						How It Works
-					</h2>
-					<p className="text-lg sm:text-xl text-white/70">
-						From data to decisions in four simple steps
-					</p>
+			<div className="mx-auto max-w-6xl relative z-10">
+				<div className="text-center mb-20">
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.6 }}
+						viewport={{ once: true }}
+					>
+						<h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+							How It Works
+						</h2>
+						<p className="text-lg sm:text-xl text-white/60">
+							From data to decisions in four simple steps
+						</p>
+					</motion.div>
 				</div>
 
 				<div className="relative">
 					{/* Timeline Line */}
-					<div className="hidden lg:block absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-purple-500 via-purple-500 to-transparent" />
+					<div className="hidden lg:block absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-violet-500 via-violet-500/50 to-transparent" />
 
 					<div className="space-y-16 lg:space-y-24">
 						{howItWorksSteps.map((step, index) => (
-							<div
+							<motion.div
 								key={index}
+								initial={{ opacity: 0, y: 20 }}
+								whileInView={{ opacity: 1, y: 0 }}
+								transition={{
+									duration: 0.6,
+									delay: index * 0.1,
+								}}
+								viewport={{ once: true }}
 								className={`flex flex-col lg:flex-row items-center gap-8 ${
 									step.position === "right"
 										? "lg:flex-row-reverse"
@@ -510,19 +575,19 @@ function HowItWorksSection() {
 								}`}
 							>
 								{/* Timeline Dot */}
-								<div className="hidden lg:block absolute left-1/2 transform -translate-x-1/2 w-6 h-6 bg-purple-500 rounded-full shadow-lg shadow-purple-500/50" />
+								<div className="hidden lg:block absolute left-1/2 transform -translate-x-1/2 w-6 h-6 bg-gradient-to-br from-violet-400 to-violet-600 rounded-full shadow-lg shadow-violet-500/50" />
 
 								{/* Content */}
 								<div className="flex-1 max-w-md">
-									<Card className="bg-white/5 backdrop-blur-md border-white/10 rounded-3xl p-8">
+									<Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300">
 										<CardContent className="p-0 space-y-4">
-											<span className="text-sm font-medium text-purple-400 uppercase tracking-wider">
+											<span className="text-sm font-semibold text-violet-300 uppercase tracking-widest">
 												{step.step}
 											</span>
 											<h3 className="text-2xl lg:text-3xl font-bold text-white">
 												{step.title}
 											</h3>
-											<p className="text-white/70 leading-relaxed">
+											<p className="text-white/60 leading-relaxed">
 												{step.description}
 											</p>
 										</CardContent>
@@ -531,7 +596,7 @@ function HowItWorksSection() {
 
 								{/* Spacer for timeline */}
 								<div className="hidden lg:block flex-1" />
-							</div>
+							</motion.div>
 						))}
 					</div>
 				</div>
@@ -543,28 +608,36 @@ function HowItWorksSection() {
 // FAQ Section
 function FAQSection() {
 	return (
-		<section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#090013]">
+		<section className="py-24 px-4 sm:px-6 lg:px-8 bg-black">
 			<div className="mx-auto max-w-4xl">
 				<div className="text-center mb-16">
-					<h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4">
-						Frequently Asked Questions
-					</h2>
-					<p className="text-lg sm:text-xl text-white/70">
-						Answers to your most common questions; all in one place.
-					</p>
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.6 }}
+						viewport={{ once: true }}
+					>
+						<h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+							Frequently Asked Questions
+						</h2>
+						<p className="text-lg sm:text-xl text-white/60">
+							Answers to your most common questions; all in one
+							place.
+						</p>
+					</motion.div>
 				</div>
 
-				<Accordion type="single" collapsible className="space-y-4">
+				<Accordion type="single" collapsible className="space-y-3">
 					{faqItems.map((item, index) => (
 						<AccordionItem
 							key={index}
 							value={`item-${index}`}
-							className="bg-white/5 backdrop-blur-md border-white/10 rounded-2xl px-6 border-0"
+							className="bg-white/5 backdrop-blur-xl border-white/10 rounded-xl px-6 border hover:bg-white/10 transition-all duration-200"
 						>
-							<AccordionTrigger className="text-white text-lg font-medium hover:no-underline py-6">
+							<AccordionTrigger className="text-white text-lg font-semibold hover:no-underline py-5">
 								{item.question}
 							</AccordionTrigger>
-							<AccordionContent className="text-white/70 text-base leading-relaxed pb-6">
+							<AccordionContent className="text-white/60 text-base leading-relaxed pb-5">
 								{item.answer}
 							</AccordionContent>
 						</AccordionItem>
@@ -575,171 +648,33 @@ function FAQSection() {
 	);
 }
 
-// Pricing Section
-function PricingSection() {
-	const [billingCycle, setBillingCycle] = useState("monthly");
-
-	return (
-		<section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#090013] relative overflow-hidden">
-			{/* Background Effects */}
-			<div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] bg-[#8f34fb] rounded-full blur-[200px] opacity-20" />
-
-			<div className="mx-auto max-w-7xl">
-				<div className="text-center mb-16">
-					<h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4">
-						Choose your Plan
-					</h2>
-					<p className="text-lg sm:text-xl text-white/70 mb-8">
-						Choose the Perfect Plan to Fit Your IoT Needs and Scale
-						with Ease
-					</p>
-
-					{/* Billing Toggle */}
-					<div className="flex items-center justify-center gap-4">
-						<span
-							className={`text-lg ${
-								billingCycle === "monthly"
-									? "text-white"
-									: "text-white/50"
-							}`}
-						>
-							Monthly
-						</span>
-						<Switch
-							checked={billingCycle === "annually"}
-							onCheckedChange={(checked: any) =>
-								setBillingCycle(
-									checked ? "annually" : "monthly"
-								)
-							}
-						/>
-						<span
-							className={`text-lg ${
-								billingCycle === "annually"
-									? "text-white"
-									: "text-white/50"
-							}`}
-						>
-							Annually
-						</span>
-					</div>
-				</div>
-
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-					{pricingPlans.map((plan, index) => (
-						<Card
-							key={index}
-							className={`relative bg-white/5 backdrop-blur-md border-white/10 rounded-3xl p-8 ${
-								plan.popular
-									? "ring-2 ring-purple-500 shadow-2xl shadow-purple-500/20 scale-105"
-									: ""
-							}`}
-						>
-							{plan.popular && (
-								<div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-									<span className="bg-gradient-to-r from-purple-600 to-purple-800 text-white px-4 py-2 rounded-full text-sm font-medium">
-										Most Popular
-									</span>
-								</div>
-							)}
-
-							<CardContent className="p-0 space-y-8">
-								<div>
-									<h3
-										className="text-2xl font-bold mb-2"
-										style={{ color: plan.color }}
-									>
-										{plan.name}
-									</h3>
-									<p className="text-white/70">
-										{plan.description}
-									</p>
-								</div>
-
-								<div className="flex items-baseline">
-									<span className="text-5xl font-bold text-white">
-										{plan.price === "Custom"
-											? "Custom"
-											: `$${plan.price}`}
-									</span>
-									{plan.price !== "Custom" && (
-										<span className="text-white/50 ml-2">
-											/month
-										</span>
-									)}
-								</div>
-
-								<Button
-									className={`w-full rounded-full py-3 text-lg font-semibold ${
-										plan.buttonStyle === "primary"
-											? "bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 text-white"
-											: "bg-white/10 hover:bg-white/20 text-white border border-white/20"
-									}`}
-								>
-									{plan.buttonText}
-								</Button>
-
-								<div className="space-y-4">
-									{plan.features.map(
-										(feature, featureIndex) => (
-											<div
-												key={featureIndex}
-												className="flex items-start gap-3"
-											>
-												<div
-													className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5"
-													style={{
-														backgroundColor:
-															plan.color,
-													}}
-												>
-													<svg
-														className="w-3 h-3 text-white"
-														fill="currentColor"
-														viewBox="0 0 20 20"
-													>
-														<path
-															fillRule="evenodd"
-															d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-															clipRule="evenodd"
-														/>
-													</svg>
-												</div>
-												<span className="text-white/80 text-sm leading-relaxed">
-													{feature}
-												</span>
-											</div>
-										)
-									)}
-								</div>
-							</CardContent>
-						</Card>
-					))}
-				</div>
-			</div>
-		</section>
-	);
-}
-
 // CTA Section
 function CTASection() {
 	return (
-		<section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#090013] text-center">
-			<div className="mx-auto max-w-4xl">
-				<h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
-					Ready to Transform Your Data?
-				</h2>
-				<p className="text-lg sm:text-xl text-white/70 mb-8 max-w-2xl mx-auto">
-					Join hundreds of businesses already using InsightOps AI to
-					make smarter decisions
-				</p>
-				<div className="relative inline-block">
+		<section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-black to-black text-center relative overflow-hidden">
+			<div className="absolute inset-0 bg-gradient-to-r from-violet-600/10 via-transparent to-violet-600/10 blur-3xl" />
+
+			<div className="mx-auto max-w-4xl relative z-10">
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					whileInView={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.6 }}
+					viewport={{ once: true }}
+				>
+					<h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+						Ready to Transform Your Data?
+					</h2>
+					<p className="text-lg sm:text-xl text-white/60 mb-10 max-w-2xl mx-auto">
+						Join hundreds of businesses already using Capi AI to
+						make smarter decisions
+					</p>
 					<Link href={"/chat"}>
-						<Button className="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 text-white rounded-full px-12 py-4 text-xl font-bold shadow-2xl shadow-purple-500/30">
+						<Button className="bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white rounded-lg px-12 py-4 text-lg font-bold shadow-lg shadow-violet-500/30 transition-all duration-200 hover:shadow-violet-500/50">
 							Get Started Now
+							<ArrowRight className="w-5 h-5 ml-2" />
 						</Button>
 					</Link>
-				</div>
+				</motion.div>
 			</div>
 		</section>
 	);
@@ -747,23 +682,43 @@ function CTASection() {
 
 // Footer
 function Footer() {
+	const { theme } = useTheme();
+	const [mounted, setMounted] = useState(false);
+
+	React.useEffect(() => {
+		setMounted(true);
+	}, []);
+
 	return (
-		<footer className="bg-[#090013] border-t border-white/10 py-16 px-4 sm:px-6 lg:px-8">
+		<footer className="bg-black border-t border-white/5 py-16 px-4 sm:px-6 lg:px-8">
 			<div className="mx-auto max-w-7xl">
-				<div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
+				<div className="grid grid-cols-1 lg:grid-cols-4 gap-12 mb-12">
 					{/* Logo and Description */}
 					<div className="lg:col-span-2">
-						<div className="flex items-center space-x-2 mb-4">
-							<div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg flex items-center justify-center">
-								<span className="text-white font-bold text-lg">
-									C
-								</span>
+						<Link
+							href="/"
+							className="flex items-center gap-3 group mb-6 w-fit"
+						>
+							<div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 shadow-lg shadow-violet-500/30 group-hover:shadow-violet-500/50 transition-all duration-300">
+								<Image
+									src={logoIcon || "/placeholder.svg"}
+									alt="Logo"
+									className="h-6 w-6"
+								/>
 							</div>
-							<span className="text-white font-semibold text-xl">
-								Capi
-							</span>
-						</div>
-						<p className="text-white/60 max-w-md">
+							{mounted && (
+								<Image
+									src={
+										theme === "dark"
+											? logoTextDark
+											: logoText
+									}
+									alt="Capi"
+									className="h-6 transition-opacity duration-200"
+								/>
+							)}
+						</Link>
+						<p className="text-white/50 max-w-md leading-relaxed text-sm">
 							Transform your business data into actionable
 							insights with AI-powered analytics and intelligent
 							automation.
@@ -772,19 +727,19 @@ function Footer() {
 
 					{/* Contact Info */}
 					<div>
-						<h3 className="text-white font-bold text-lg mb-4">
-							CONTACT US
+						<h3 className="text-white font-bold text-base mb-6 uppercase tracking-wide">
+							Contact Us
 						</h3>
-						<div className="space-y-2">
+						<div className="space-y-3">
 							<Link
 								href="tel:+213684575145"
-								className="block text-white/60 hover:text-white transition-colors"
+								className="block text-white/50 hover:text-white transition-colors text-sm"
 							>
 								(+213) 684575145
 							</Link>
 							<Link
 								href="mailto:contact@capi.com"
-								className="block text-white/60 hover:text-white transition-colors"
+								className="block text-white/50 hover:text-white transition-colors text-sm"
 							>
 								contact@capi.com
 							</Link>
@@ -793,38 +748,42 @@ function Footer() {
 
 					{/* Social Links */}
 					<div>
-						<h3 className="text-white font-bold text-lg mb-4">
-							FOLLOW US
+						<h3 className="text-white font-bold text-base mb-6 uppercase tracking-wide">
+							Follow Us
 						</h3>
 						<div className="flex space-x-3">
-							{socialLinks.map((social) => (
-								<Button
-									key={social.id}
-									variant="ghost"
-									size="icon"
-									className={`${social.bgColor} hover:opacity-80 rounded-full w-10 h-10`}
-								>
-									<Image
-										src={social.icon || "/placeholder.svg"}
-										alt={social.id}
-										width={20}
-										height={20}
-										className="w-5 h-5"
-									/>
-								</Button>
-							))}
+							{socialLinks.map((social) => {
+								const IconComponent = social.icon;
+								return (
+									<Link
+										key={social.id}
+										href={social.href}
+										target="_blank"
+										rel="noopener noreferrer"
+										aria-label={social.label}
+									>
+										<Button
+											variant="ghost"
+											size="icon"
+											className={`${social.bgColor} rounded-lg w-10 h-10 transition-all duration-200`}
+										>
+											<IconComponent className="w-5 h-5 text-white" />
+										</Button>
+									</Link>
+								);
+							})}
 						</div>
 					</div>
 				</div>
 
 				{/* Navigation Links */}
-				<div className="border-t border-white/10 pt-8">
+				<div className="border-t border-white/5 pt-8">
 					<nav className="flex flex-wrap justify-center gap-8 mb-8">
 						{footerNavLinks.map((link) => (
 							<Link
 								key={link.label}
 								href={link.href}
-								className="text-white/60 hover:text-white transition-colors"
+								className="text-white/50 hover:text-white transition-colors text-sm"
 							>
 								{link.label}
 							</Link>
@@ -832,7 +791,7 @@ function Footer() {
 					</nav>
 
 					{/* Copyright */}
-					<div className="text-center text-white/40 text-sm">
+					<div className="text-center text-white/30 text-xs">
 						© 2025 Capi. All rights are reserved
 					</div>
 				</div>
@@ -844,13 +803,11 @@ function Footer() {
 // Main Landing Page Component
 export default function LandingPage() {
 	return (
-		<div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-			<Header />
-			{/* <FeaturesSection /> */}
+		<div>
+			<FeaturesSection />
 			<VelocityScrollSection />
 			<HowItWorksSection />
 			<FAQSection />
-			<PricingSection />
 			<CTASection />
 			<Footer />
 		</div>

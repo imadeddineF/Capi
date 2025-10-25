@@ -36,7 +36,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useRouter } from "next/navigation";
-import { v4 as uuidv4 } from "uuid";
 
 interface HistoryItem {
   title: string;
@@ -390,13 +389,15 @@ export function NavMain({
                 <SidebarMenuButton
                   tooltip={item.title}
                   className={`w-full justify-between transition-all duration-200 ${
+                    !open ? "h-8 w-8 p-2 justify-center" : ""
+                  } ${
                     item.isActive || isItemActive(item.url)
                       ? "bg-imad text-white hover:bg-imad/90"
                       : ""
                   }`}
                   isActive={item.isActive || isItemActive(item.url)}
                 >
-                  <div className="flex items-center gap-2 min-w-0">
+                  <div className={`flex items-center gap-2 ${open ? "min-w-0" : "justify-center"}`}>
                     {item.icon && <item.icon className="h-4 w-4 flex-shrink-0" />}
                     {open && (
                       <span className="truncate animate-in fade-in slide-in-from-left-1 duration-200">

@@ -22,13 +22,11 @@ import Link from "next/link";
 import { NavProjects } from "./nav-projects";
 import { NavUser } from "./nav-user";
 import { NavMain } from "./nav-main";
-import logo from "../../../../public/logo.svg";
 import logoIcon from "../../../../public/logo-icon.svg";
 import logoText from "../../../../public/logo-text.svg";
 import logoTextDark from "../../../../public/logo-text-dark.svg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { v4 as uuidv4 } from "uuid";
 import { getUrlParam } from "@/utils/url-params";
 import { useTheme } from "next-themes";
 
@@ -110,21 +108,8 @@ const data = {
 	],
 };
 
-const testAdmin = {
-	id: "admin123",
-	email: "admin@example.com",
-	phone: "+1234567890",
-	firstName: "John",
-	lastName: "Doe",
-	createdAt: new Date().toISOString(),
-	updatedAt: new Date().toISOString(),
-	language: "en",
-	profilePic: "/placeholder.svg?height=32&width=32",
-	status: "active",
-};
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-	const { open, state } = useSidebar();
+	const { open } = useSidebar();
 	const { theme } = useTheme();
 	const router = useRouter();
 	const [historyData, setHistoryData] = React.useState<HistoryItem[]>([]);
@@ -286,8 +271,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 		[historyData]
 	);
 
-	const isCollapsed = state === "collapsed";
-
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader
@@ -295,10 +278,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 					open ? "px-4 justify-start" : "px-0 justify-center"
 				} flex items-center transition-all duration-200`}
 			>
-				<Link href="/chat" className="flex items-center gap-2.5 group w-full">
-					<div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-blue-600 shadow-sm group-hover:shadow-md transition-all duration-200 flex-shrink-0">
-						<Image src={logoIcon} alt="logo" className="h-6 w-6" />
-					</div>
+				<Link
+					href="/chat"
+					className="flex items-center gap-1 group w-full"
+				>
+					<Image
+						src={logoIcon}
+						alt="logo"
+						className={`h-9 w-9 ${!open && "mx-auto"}`}
+					/>
 					{open && (
 						<div className="flex items-center overflow-hidden">
 							{theme === "dark" ? (
@@ -320,17 +308,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			</SidebarHeader>
 
 			<SidebarContent className="pt-3 sidebar-toolbar overflow-y-auto">
-				<div className={`${open ? "px-3" : "px-2.5"} mb-3 transition-all duration-200`}>
+				<div
+					className={`${
+						open ? "px-3" : "px-2"
+					} mb-3 transition-all duration-200`}
+				>
 					<Button
 						onClick={handleNewChat}
 						className={`w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm hover:shadow-md transition-all duration-200 ${
-							!open ? "px-2 justify-center" : ""
+							!open ? "h-8 w-8 p-0" : ""
 						}`}
 						size={!open ? "icon" : "default"}
 						title={!open ? "New Chat" : undefined}
 					>
-						<Plus className="h-4 w-4 flex-shrink-0" />
-						{open && <span className="animate-in fade-in slide-in-from-left-1 duration-200">New Chat</span>}
+						<Plus className={`flex-shrink-0 ${!open ? "h-4 w-4" : "h-4 w-4"}`} />
+						{open && (
+							<span className="animate-in fade-in slide-in-from-left-1 duration-200">
+								New Chat
+							</span>
+						)}
 					</Button>
 				</div>
 
